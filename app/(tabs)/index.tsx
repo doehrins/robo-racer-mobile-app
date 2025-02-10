@@ -9,23 +9,35 @@ export default function HomeScreen() {
   return (
     <View style={styles.container}>
       <Image
-        source={require("../../assets/images/garmin-logo.png")}
         style={styles.logo}
+        source={require("../../assets/images/garmin-logo.png")}
         resizeMode="contain" // scales image to fit within the given height and width without cropping
       />
+
+      <View style={styles.configContainer}>
+        {/* Fill in */}
+      </View>
+
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    paddingTop: 50,
-    flex: 1, // Expands to fill all vertical space
+    padding: 20,
+    flex: 1, // Expands to fill all vertical space,
+    alignItems: 'center',
+    gap: 20,
     backgroundColor: 'white',
   },
   logo: {
     width: 200,
     height: 55,
-    paddingLeft: 20,
+    alignSelf: 'flex-start'
   },
+  configContainer: {
+    width: '100%',
+    height: 400,
+    backgroundColor: 'gray',
+  }
 });
