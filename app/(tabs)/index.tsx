@@ -1,74 +1,170 @@
-import { Image, StyleSheet, Platform } from 'react-native';
+import { View, Text, Button, Image, Alert, StyleSheet, Pressable } from 'react-native';
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
 
 export default function HomeScreen() {
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Config Page</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12'
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    <View style={styles.container}>
+      <Image
+        style={styles.logo}
+        source={require("../../assets/images/garmin-logo.png")}
+        resizeMode="contain" // scales image to fit within the given height and width without cropping
+      />
+
+      <View style={styles.configContainer}>
+        <View style={styles.intervalsContainer}>
+          <Text style={{
+            fontWeight: 'bold',
+            fontSize: 20,
+            }}>
+            Intervals
+          </Text>
+
+          <View style={styles.headingsContainer}>
+            <Text>Int</Text>
+            <Text>Speed</Text>
+            <Text>Distance</Text>
+          </View>
+
+          <View style={styles.intervalContainer}>
+            <Text>1</Text>
+            <Text>1.0</Text>
+            <Text>20</Text>
+            <Pressable
+              style={styles.editButton}
+              onPress={() => Alert.alert("Edit button pressed")}
+              >
+              <Image
+                style={{flex: 1}}
+                source={require('../../assets/images/pencil-icon.png')}
+                resizeMode='contain'
+              />
+            </Pressable>
+          </View>
+
+          <View style={styles.intervalContainer}>
+            <Text>2</Text>
+            <Text>5.0 </Text>
+            <Text>100</Text>
+            <Pressable
+              style={styles.editButton}
+              onPress={() => Alert.alert("Edit button pressed")}
+              >
+              <Image
+                style={{flex: 1}}
+                source={require('../../assets/images/pencil-icon.png')}
+                resizeMode='contain'
+              />
+            </Pressable>
+          </View>
+
+          <Pressable
+            style={styles.addIntervalButton}
+            onPress={() => Alert.alert("Add Interval button pressed")}
+            >
+            <Image
+              style={{height: '100%', width: 30}}
+              source={require('../../assets/images/plus-icon.png')}
+              resizeMode='contain'
+              />
+
+              <Text style={{color: garminBlue}}>Add Interval</Text>
+          </Pressable>
+        </View>
+
+        <View style={styles.buttonsContainer}>
+          <Pressable
+            style={styles.button}
+            onPress={() => Alert.alert("Save button pressed")}
+            >
+            <Text style={styles.buttonText}>Save</Text>
+          </Pressable>
+
+          <Pressable
+            style={styles.button}
+            onPress={() => Alert.alert("Add to Profile button pressed")}
+            >
+            <Text style={styles.buttonText}>Add to Profile</Text>
+          </Pressable>
+        </View>
+      </View>
+    </View>
   );
 }
 
+const garminBlue = '#007cc1'
+
 const styles = StyleSheet.create({
-  titleContainer: {
+  container: {
+    padding: 20,
+    flex: 1, // Expands to fill all vertical space,
+    alignItems: 'center',
+    gap: 20,
+    backgroundColor: 'white',
+  },
+  logo: {
+    width: 200,
+    height: 55,
+    alignSelf: 'flex-start',
+  },
+  configContainer: {
+    width: '100%',
+    height: 400, // update
+    padding: 20,
+    borderRadius: 20,
+    gap: 20,
+    backgroundColor: 'lightgray',
+  },
+  intervalsContainer: {
+    padding: 20,
+    flex: 1,
+    gap: 10,
+    borderRadius: 15,
+    backgroundColor: 'white',
+  },
+  headingsContainer: {
+    marginTop: 10,
+    paddingHorizontal: 15,
+    flexDirection: 'row',
+    gap: 30,
+  },
+  intervalContainer: {
+    height: 40,
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    justifyContent: 'space-between',
+    backgroundColor: 'lightgray',
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  editButton: {
+    width: 20,
+    alignItems: 'center',
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  addIntervalButton: {
+    height: 40,
+    padding: 7,
+    borderRadius: 10,
+    borderWidth: 3,
+    borderColor: garminBlue,
+    borderStyle: 'dashed',
+    backgroundColor: '#EDEDED',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center'
   },
+  buttonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  button: {
+    padding: 10,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: garminBlue,
+  },
+  buttonText: {
+    color: 'white'
+  }
 });
