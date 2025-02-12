@@ -1,4 +1,5 @@
-import { View, Text, Image, Alert, StyleSheet, Pressable, ColorValue } from 'react-native';
+import { useState } from 'react'
+import { View, Text, TextInput, Image, Alert, StyleSheet, Pressable, ColorValue } from 'react-native';
 import { IntervalView } from '@/components/IntervalView';
 import { Interval } from '@/constants/types'
 
@@ -43,6 +44,8 @@ export default function HomeScreen() {
               />
           ))}
 
+          <AddIntervalView />
+
           <Pressable
             style={styles.addIntervalButton}
             onPress={() => Alert.alert("Add Interval button pressed")}
@@ -77,8 +80,68 @@ export default function HomeScreen() {
   );
 }
 
+function AddIntervalView() {
+  const [speed, setSpeed] = useState('');
+  const [distance, setDistance] = useState('');
+
+  return (
+    <View style={addIntervalViewStyles.intervalContainer}>
+      <Text>16</Text>
+      <TextInput
+        style={addIntervalViewStyles.textInput}
+        keyboardType='numeric'
+        placeholder='0.0'
+        placeholderTextColor={'black'}
+        textAlign='center'
+        onChangeText={newSpeed => setSpeed(newSpeed)}
+        />
+      <TextInput
+        style={addIntervalViewStyles.textInput}
+        keyboardType='numeric'
+        placeholder='0'
+        placeholderTextColor={'black'}
+        textAlign='center'
+        onChangeText={newDistance => setDistance(newDistance)}
+        />
+      <Pressable
+        style={addIntervalViewStyles.editButton}
+        onPress={() => Alert.alert(`Speed: ${speed} Distance: ${distance}`)}
+        >
+        <Image
+          style={{flex: 1}}
+          source={require('../../assets/images/check-mark-icon.png')}
+          resizeMode='contain'
+        />
+      </Pressable>
+    </View>
+  );
+}
+
+const addIntervalViewStyles = StyleSheet.create({
+  intervalContainer: {
+    height: 40,
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: 'lightgray',
+  },
+  textInput: {
+    height: 20,
+    width: 40,
+    borderWidth: 1,
+  },
+  editButton: {
+    width: 20,
+    alignItems: 'center',
+  },
+});
+
 
 const garminBlue: ColorValue = '#007cc1'
+const customGreen: ColorValue = '#32A114'
 
 const styles = StyleSheet.create({
   container: {
@@ -95,7 +158,7 @@ const styles = StyleSheet.create({
   },
   configContainer: {
     width: '100%',
-    height: 400, // update
+    height: 600,
     padding: 20,
     borderRadius: 20,
     gap: 20,
