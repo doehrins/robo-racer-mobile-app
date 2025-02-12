@@ -1,5 +1,14 @@
-import { View, Text, Button, Image, Alert, StyleSheet, Pressable } from 'react-native';
+import { View, Text, Image, Alert, StyleSheet, Pressable, ColorValue } from 'react-native';
+import { IntervalView } from '@/components/IntervalView';
+import { Interval } from '@/constants/types'
 
+
+
+const intervals: Interval[] = [
+  {index: 1, speed: 1.0, distance: 20},
+  {index: 2, speed: 5.0, distance: 100},
+  {index: 3, speed: 8.0, distance: 2000},
+]
 
 export default function HomeScreen() {
   return (
@@ -25,37 +34,14 @@ export default function HomeScreen() {
             <Text>Distance</Text>
           </View>
 
-          <View style={styles.intervalContainer}>
-            <Text>1</Text>
-            <Text>1.0</Text>
-            <Text>20</Text>
-            <Pressable
-              style={styles.editButton}
-              onPress={() => Alert.alert("Edit button pressed")}
-              >
-              <Image
-                style={{flex: 1}}
-                source={require('../../assets/images/pencil-icon.png')}
-                resizeMode='contain'
+          {intervals.map((interval) => (
+            <IntervalView
+              key={interval.index} // necessary for React to manipulate the DOM
+              index={interval.index}
+              speed={interval.speed}
+              distance={interval.distance}
               />
-            </Pressable>
-          </View>
-
-          <View style={styles.intervalContainer}>
-            <Text>2</Text>
-            <Text>5.0 </Text>
-            <Text>100</Text>
-            <Pressable
-              style={styles.editButton}
-              onPress={() => Alert.alert("Edit button pressed")}
-              >
-              <Image
-                style={{flex: 1}}
-                source={require('../../assets/images/pencil-icon.png')}
-                resizeMode='contain'
-              />
-            </Pressable>
-          </View>
+          ))}
 
           <Pressable
             style={styles.addIntervalButton}
@@ -91,12 +77,13 @@ export default function HomeScreen() {
   );
 }
 
-const garminBlue = '#007cc1'
+
+const garminBlue: ColorValue = '#007cc1'
 
 const styles = StyleSheet.create({
   container: {
     padding: 20,
-    flex: 1, // Expands to fill all vertical space,
+    flex: 1, // Expands to fill all vertical space
     alignItems: 'center',
     gap: 20,
     backgroundColor: 'white',
@@ -126,20 +113,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     flexDirection: 'row',
     gap: 30,
-  },
-  intervalContainer: {
-    height: 40,
-    borderRadius: 10,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: 'lightgray',
-  },
-  editButton: {
-    width: 20,
-    alignItems: 'center',
   },
   addIntervalButton: {
     height: 40,
