@@ -6,6 +6,9 @@
 const tintColorLight = '#0a7ea4';
 const tintColorDark = '#fff';
 
+export const garminBlue = '#007cc1'
+const customGreen = '#32A114'
+
 export const Colors = {
   light: {
     text: '#11181C',
