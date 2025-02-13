@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import { View, Text, TextInput, Image, Alert, StyleSheet, Pressable, ColorValue } from 'react-native';
+import { View, Text, TextInput, Image, Alert, StyleSheet, Pressable } from 'react-native';
 import { IntervalView } from '@/components/IntervalView';
 import { IntervalFormView } from '@/components/IntervalFormView'
 import { Interval } from '@/constants/types'
+import { garminBlue } from '@/constants/Colors'
 
 
 const initialIntervals: Interval[] = [
@@ -13,6 +14,12 @@ const initialIntervals: Interval[] = [
 
 export default function HomeScreen() {
   const [intervals, setIntervals] = useState(initialIntervals)
+  const [showingIntervalFormView, setShowingIntervalFormView] = useState(false)
+
+  function handleIntervalSubmit(newIndex: number, newSpeed: number, newDistance: number) {
+    setShowingIntervalFormView(false);
+    setIntervals([...intervals, {index: newIndex, speed: newSpeed, distance: newDistance}]);
+  }
 
   return (
     <View style={styles.container}>
@@ -46,14 +53,18 @@ export default function HomeScreen() {
               />
           ))}
 
-          <IntervalFormView onSubmit={(newSpeed: number, newDistance: number) => setIntervals([
-            ...intervals,
-            {index: 1, speed: newSpeed, distance: newDistance}
-          ])}/>
 
+          {showingIntervalFormView && // Conditionally render form
+            <IntervalFormView
+              index={intervals.length + 1}
+              onSubmit={(newSpeed: number, newDistance: number) => handleIntervalSubmit(intervals.length + 1, newSpeed, newDistance)}
+              />
+          }
+
+        
           <Pressable
             style={styles.addIntervalButton}
-            onPress={() => Alert.alert("Add Interval button pressed")}
+            onPress={() => setShowingIntervalFormView(true)}
             >
             <Image
               style={{height: '100%', width: 30}}
@@ -61,7 +72,7 @@ export default function HomeScreen() {
               resizeMode='contain'
               />
 
-              <Text style={{color: garminBlue}}>Add Interval</Text>
+            <Text style={{color: garminBlue}}>Add Interval</Text>
           </Pressable>
         </View>
 
@@ -85,9 +96,6 @@ export default function HomeScreen() {
   );
 }
 
-
-const garminBlue: ColorValue = '#007cc1'
-const customGreen: ColorValue = '#32A114'
 
 const styles = StyleSheet.create({
   container: {

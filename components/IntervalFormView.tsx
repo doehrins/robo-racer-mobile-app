@@ -2,10 +2,11 @@ import { useState } from 'react'
 import { View, Text, TextInput, Image, Alert, StyleSheet, Pressable } from 'react-native';
 
 interface IntervalFormViewProps {
-    onSubmit: (speed: number, distance: number) => void
+    index: number;
+    onSubmit: (speed: number, distance: number) => void;
 }
 
-export function IntervalFormView({ onSubmit }: IntervalFormViewProps) {
+export function IntervalFormView({ index, onSubmit }: IntervalFormViewProps) {
     const [speed, setSpeed] = useState('');
     const [distance, setDistance] = useState('');
 
@@ -26,7 +27,7 @@ export function IntervalFormView({ onSubmit }: IntervalFormViewProps) {
 
     return (
         <View style={styles.intervalContainer}>
-            <Text>16</Text>
+            <Text>{index}</Text>
 
             <TextInput
                 style={styles.textInput}
