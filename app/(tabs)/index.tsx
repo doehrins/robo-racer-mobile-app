@@ -1,17 +1,19 @@
 import { useState } from 'react'
 import { View, Text, TextInput, Image, Alert, StyleSheet, Pressable, ColorValue } from 'react-native';
 import { IntervalView } from '@/components/IntervalView';
+import { IntervalFormView } from '@/components/IntervalFormView'
 import { Interval } from '@/constants/types'
 
 
-
-const intervals: Interval[] = [
+const initialIntervals: Interval[] = [
   {index: 1, speed: 1.0, distance: 20},
   {index: 2, speed: 5.0, distance: 100},
   {index: 3, speed: 8.0, distance: 2000},
 ]
 
 export default function HomeScreen() {
+  const [intervals, setIntervals] = useState(initialIntervals)
+
   return (
     <View style={styles.container}>
       <Image
@@ -44,7 +46,10 @@ export default function HomeScreen() {
               />
           ))}
 
-          <AddIntervalView />
+          <IntervalFormView onSubmit={(newSpeed: number, newDistance: number) => setIntervals([
+            ...intervals,
+            {index: 1, speed: newSpeed, distance: newDistance}
+          ])}/>
 
           <Pressable
             style={styles.addIntervalButton}
@@ -79,65 +84,6 @@ export default function HomeScreen() {
     </View>
   );
 }
-
-function AddIntervalView() {
-  const [speed, setSpeed] = useState('');
-  const [distance, setDistance] = useState('');
-
-  return (
-    <View style={addIntervalViewStyles.intervalContainer}>
-      <Text>16</Text>
-      <TextInput
-        style={addIntervalViewStyles.textInput}
-        keyboardType='numeric'
-        placeholder='0.0'
-        placeholderTextColor={'black'}
-        textAlign='center'
-        onChangeText={newSpeed => setSpeed(newSpeed)}
-        />
-      <TextInput
-        style={addIntervalViewStyles.textInput}
-        keyboardType='numeric'
-        placeholder='0'
-        placeholderTextColor={'black'}
-        textAlign='center'
-        onChangeText={newDistance => setDistance(newDistance)}
-        />
-      <Pressable
-        style={addIntervalViewStyles.editButton}
-        onPress={() => Alert.alert(`Speed: ${speed} Distance: ${distance}`)}
-        >
-        <Image
-          style={{flex: 1}}
-          source={require('../../assets/images/check-mark-icon.png')}
-          resizeMode='contain'
-        />
-      </Pressable>
-    </View>
-  );
-}
-
-const addIntervalViewStyles = StyleSheet.create({
-  intervalContainer: {
-    height: 40,
-    borderRadius: 10,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: 'lightgray',
-  },
-  textInput: {
-    height: 20,
-    width: 40,
-    borderWidth: 1,
-  },
-  editButton: {
-    width: 20,
-    alignItems: 'center',
-  },
-});
 
 
 const garminBlue: ColorValue = '#007cc1'
