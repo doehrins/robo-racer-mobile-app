@@ -57,6 +57,8 @@ export default function HomeScreen() {
           {showingIntervalFormView && // Conditionally render form
             <IntervalFormView
               index={intervals.length + 1}
+              defaultSpeed={NaN}
+              defaultDist={NaN}
               onSubmit={(newSpeed: number, newDistance: number) => handleIntervalSubmit(intervals.length + 1, newSpeed, newDistance)}
               />
           }

@@ -30,6 +30,8 @@ export function IntervalView({ index, speed, distance }: Interval) {
       {showingFormView &&
         <IntervalFormView
           index={index}
+          defaultSpeed={speed}
+          defaultDist={distance}
           onSubmit={(newSpeed: number, newDistance: number) => {Alert.alert("edit form submitted")}}
         />
       }
