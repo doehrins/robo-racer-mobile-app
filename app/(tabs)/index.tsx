@@ -16,9 +16,25 @@ export default function HomeScreen() {
   const [intervals, setIntervals] = useState(initialIntervals)
   const [showingIntervalFormView, setShowingIntervalFormView] = useState(false)
 
-  function handleIntervalSubmit(newIndex: number, newSpeed: number, newDistance: number) {
-    setShowingIntervalFormView(false);
-    setIntervals([...intervals, {index: newIndex, speed: newSpeed, distance: newDistance}]);
+  function handleIntervalSubmit(index: number, newSpeed: number, newDistance: number) {
+    // If adding a new interval
+    if (index == intervals.length + 1) {
+      setIntervals([...intervals, {index: index, speed: newSpeed, distance: newDistance}]);
+      setShowingIntervalFormView(false);
+    }
+    // If editing an existing interval
+    else {
+      const newIntervals = intervals.map((interval, i) => {
+        if (i == index - 1) {
+          // Insert edited interval in proper location
+          return {index: index, speed: newSpeed, distance: newDistance};
+        }
+        else {
+          return interval;
+        }
+      });
+      setIntervals(newIntervals)
+    }
   }
 
   return (
@@ -47,9 +63,8 @@ export default function HomeScreen() {
           {intervals.map((interval) => (
             <IntervalView
               key={interval.index} // necessary for React to manipulate the DOM
-              index={interval.index}
-              speed={interval.speed}
-              distance={interval.distance}
+              interval={interval}
+              onEditSubmit={(newSpeed: number, newDistance: number) => handleIntervalSubmit(interval.index, newSpeed, newDistance)}
               />
           ))}
 
@@ -57,6 +72,8 @@ export default function HomeScreen() {
           {showingIntervalFormView && // Conditionally render form
             <IntervalFormView
               index={intervals.length + 1}
+              defaultSpeed={NaN}
+              defaultDist={NaN}
               onSubmit={(newSpeed: number, newDistance: number) => handleIntervalSubmit(intervals.length + 1, newSpeed, newDistance)}
               />
           }

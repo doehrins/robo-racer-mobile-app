@@ -3,12 +3,24 @@ import { View, Text, TextInput, Image, Alert, StyleSheet, Pressable } from 'reac
 
 interface IntervalFormViewProps {
     index: number;
+    defaultSpeed: number;
+    defaultDist: number;
     onSubmit: (speed: number, distance: number) => void;
 }
 
-export function IntervalFormView({ index, onSubmit }: IntervalFormViewProps) {
-    const [speed, setSpeed] = useState('');
-    const [distance, setDistance] = useState('');
+export function IntervalFormView({ index, defaultSpeed, defaultDist, onSubmit }: IntervalFormViewProps) {
+    let defaultSpeedValue: String = '';
+    let defaultDistValue: String = '';
+
+    // Check if form is in edit mode
+    if (!Number.isNaN(defaultSpeed) && !Number.isNaN(defaultDist)) {
+        // Populate existing data
+        defaultSpeedValue = defaultSpeed.toString();
+        defaultDistValue = defaultDist.toString();
+    }
+
+    const [speed, setSpeed] = useState(defaultSpeedValue);
+    const [distance, setDistance] = useState(defaultDistValue);
 
 
     function handleIntervalSubmit(speed: String, distance: String) {
@@ -32,6 +44,7 @@ export function IntervalFormView({ index, onSubmit }: IntervalFormViewProps) {
             <TextInput
                 style={styles.textInput}
                 keyboardType='numeric'
+                value={speed}
                 placeholder='0.0'
                 placeholderTextColor={'lightgray'}
                 textAlign='center'
@@ -41,6 +54,7 @@ export function IntervalFormView({ index, onSubmit }: IntervalFormViewProps) {
             <TextInput
                 style={styles.textInput}
                 keyboardType='numeric'
+                value={distance}
                 placeholder='0'
                 placeholderTextColor={'lightgray'}
                 textAlign='center'
