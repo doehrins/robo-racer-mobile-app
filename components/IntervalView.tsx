@@ -1,24 +1,39 @@
+import { useState } from 'react'
 import { View, Text, Image, Alert, StyleSheet, Pressable } from 'react-native';
 import { Interval } from '@/constants/types'
+import { IntervalFormView } from './IntervalFormView';
 
 
 export function IntervalView({ index, speed, distance }: Interval) {
+  const [showingFormView, setShowingFormView] = useState(false);
+
   return (
-    <View style={intervalViewStyles.intervalContainer}>
-      <Text>{index}</Text>
-      <Text>{speed}</Text>
-      <Text>{distance}</Text>
-      <Pressable
-        style={intervalViewStyles.editButton}
-        onPress={() => Alert.alert("Edit button pressed")}
-        >
-        <Image
-          style={{flex: 1}}
-          source={require('../assets/images/pencil-icon.png')}
-          resizeMode='contain'
+    <>
+      {!showingFormView && 
+        <View style={intervalViewStyles.intervalContainer}>
+          <Text>{index}</Text>
+          <Text>{speed}</Text>
+          <Text>{distance}</Text>
+          <Pressable
+            style={intervalViewStyles.editButton}
+            onPress={() => setShowingFormView(true)}
+            >
+            <Image
+              style={{flex: 1}}
+              source={require('../assets/images/pencil-icon.png')}
+              resizeMode='contain'
+            />
+          </Pressable>
+        </View>
+      }
+
+      {showingFormView &&
+        <IntervalFormView
+          index={index}
+          onSubmit={(newSpeed: number, newDistance: number) => {Alert.alert("edit form submitted")}}
         />
-      </Pressable>
-    </View>
+      }
+    </>
   );
 }
 
