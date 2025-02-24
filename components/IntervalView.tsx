@@ -4,16 +4,22 @@ import { Interval } from '@/constants/types'
 import { IntervalFormView } from './IntervalFormView';
 
 
-export function IntervalView({ index, speed, distance }: Interval) {
+interface IntervalViewProps {
+  interval: Interval;
+  onEditSubmit: (speed: number, distance: number) => void
+}
+
+
+export function IntervalView({ interval, onEditSubmit }: IntervalViewProps) {
   const [showingFormView, setShowingFormView] = useState(false);
 
   return (
     <>
       {!showingFormView && 
         <View style={intervalViewStyles.intervalContainer}>
-          <Text>{index}</Text>
-          <Text>{speed}</Text>
-          <Text>{distance}</Text>
+          <Text>{interval.index}</Text>
+          <Text>{interval.speed}</Text>
+          <Text>{interval.distance}</Text>
           <Pressable
             style={intervalViewStyles.editButton}
             onPress={() => setShowingFormView(true)}
@@ -29,10 +35,13 @@ export function IntervalView({ index, speed, distance }: Interval) {
 
       {showingFormView &&
         <IntervalFormView
-          index={index}
-          defaultSpeed={speed}
-          defaultDist={distance}
-          onSubmit={(newSpeed: number, newDistance: number) => {Alert.alert("edit form submitted")}}
+          index={interval.index}
+          defaultSpeed={interval.speed}
+          defaultDist={interval.distance}
+          onSubmit={(newSpeed: number, newDistance: number) => {
+            setShowingFormView(false);
+            onEditSubmit(newSpeed, newDistance);
+          }}
         />
       }
     </>
