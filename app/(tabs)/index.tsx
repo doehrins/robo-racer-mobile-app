@@ -17,14 +17,16 @@ export default function HomeScreen() {
   const [showingIntervalFormView, setShowingIntervalFormView] = useState(false)
 
   function handleIntervalSubmit(index: number, newSpeed: number, newDistance: number) {
-
+    // If adding a new interval
     if (index == intervals.length + 1) {
       setIntervals([...intervals, {index: index, speed: newSpeed, distance: newDistance}]);
       setShowingIntervalFormView(false);
     }
+    // If editing an existing interval
     else {
       const newIntervals = intervals.map((interval, i) => {
         if (i == index - 1) {
+          // Insert edited interval in proper location
           return {index: index, speed: newSpeed, distance: newDistance};
         }
         else {
