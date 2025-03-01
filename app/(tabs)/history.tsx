@@ -2,28 +2,27 @@ import React from 'react';
 import {
   View,
   Text,
-  TouchableOpacity,
   StyleSheet,
   FlatList,
-  ListRenderItemInfo,
   Image
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import DateTimePicker, {
-  DateTimePickerEvent
-} from '@react-native-community/datetimepicker';
-
-type HistoryItem = {
-  id: string;
-  date: string;       
-  timeRange: string;  
-  distance: string;   
-  avgSpeed: string;   
-};
+import EventItem from '@/components/EventItem';
+import FilterTag from '@/components/FilterTag';
+import FilterButton from '@/components/FilterButton';
+import DatePicker from '@/components/DatePicker';
+import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 
 interface State {
   showPicker: boolean;
   selectedDate: Date | null;
+}
+
+interface EventItemData {
+  id: string;
+  date: string;
+  timeRange: string;
+  distance: string;
+  avgSpeed: string;
 }
 
 export default class HistoryScreen extends React.Component<{}, State> {
@@ -32,7 +31,7 @@ export default class HistoryScreen extends React.Component<{}, State> {
     selectedDate: null
   };
 
-  private historyData: HistoryItem[] = [
+  private historyData: EventItemData[] = [
     { id: '1', date: '02/07/2025', timeRange: '10:34:12 - 10:40:09', distance: '1000 m', avgSpeed: '2.8 m/s' },
     { id: '2', date: '02/08/2025', timeRange: '09:10:00 - 09:25:30', distance: '2000 m', avgSpeed: '3.1 m/s' },
     { id: '3', date: '02/09/2025', timeRange: '14:00:00 - 14:10:00', distance: '1500 m', avgSpeed: '2.5 m/s' },
@@ -46,27 +45,14 @@ export default class HistoryScreen extends React.Component<{}, State> {
     const year = date.getFullYear().toString();
     return `${month}/${day}/${year}`;
   }
-
-  private getFilteredData(): HistoryItem[] {
+  // filter data by selected date
+  private getFilteredData(): EventItemData[] {
     const { selectedDate } = this.state;
     if (!selectedDate) return this.historyData;
     const desiredDateString = this.formatDate(selectedDate);
     return this.historyData.filter(item => item.date === desiredDateString);
   }
 
-  private renderHistoryItem = ({ item }: ListRenderItemInfo<HistoryItem>) => (
-    <View style={styles.historyCard}>
-      <View style={styles.historyCardContent}>
-        <Text style={styles.dateText}>{item.date}</Text>
-        <Text style={styles.timeText}>{item.timeRange}</Text>
-        <Text style={styles.distanceText}>{item.distance}</Text>
-        <Text style={styles.speedText}>{item.avgSpeed}</Text>
-      </View>
-      <Ionicons name="chevron-forward" size={20} color="#000" />
-    </View>
-  );
-
-  // Datepicker appears upon pressing calendar button
   private onPressCalendar = () => {
     this.setState({ showPicker: true });
   };
@@ -84,7 +70,6 @@ export default class HistoryScreen extends React.Component<{}, State> {
     }
   };
 
- // Reset date filter
   private clearDateSelection = () => {
     this.setState({ selectedDate: null });
   };
@@ -102,49 +87,40 @@ export default class HistoryScreen extends React.Component<{}, State> {
           source={require("../../assets/images/garmin-logo.png")}
           resizeMode="contain"
         />
-
         {/* Big gray rectangle */}
         <View style={styles.grayArea}>
           {/* tag-style button for clearing date filter */}
           {selectedDate && (
-            <TouchableOpacity
-              style={styles.filterTag}
-              onPress={this.clearDateSelection}
-            >
-              <Text style={styles.filterTagText}>{selectedDateString}</Text>
-              <Ionicons name="close-circle" size={18} color="white" />
-            </TouchableOpacity>
+            <FilterTag date={selectedDateString} onClear={this.clearDateSelection} />
           )}
 
-          {/* Calendar icon button for filtering event by date */}
           <View style={styles.filterButtonContainer}>
-            <TouchableOpacity
-              style={styles.filterButton}
-              onPress={this.onPressCalendar}
-            >
-              <Ionicons name="calendar" size={20} color="#fff" />
-            </TouchableOpacity>
+            <FilterButton onPress={this.onPressCalendar} />
           </View>
-
           {/* No events message if nothing matches */}
           {selectedDate && filteredData.length === 0 ? (
             <Text style={styles.noEventsText}>No events for {selectedDateString}</Text>
           ) : (
             <FlatList
               data={filteredData}
-              renderItem={this.renderHistoryItem}
+              renderItem={({ item }) => (
+                <EventItem
+                  id={item.id}
+                  date={item.date}
+                  timeRange={item.timeRange}
+                  distance={item.distance}
+                  avgSpeed={item.avgSpeed}
+                />
+              )}
               keyExtractor={(item) => item.id}
               contentContainerStyle={styles.listContent}
             />
           )}
         </View>
-
         {/* Native DateTimePicker */}
         {showPicker && (
-          <DateTimePicker
+          <DatePicker
             value={selectedDate || new Date()}
-            mode="date"
-            display="default"
             onChange={this.onChangeDate}
           />
         )}
@@ -171,65 +147,12 @@ const styles = StyleSheet.create({
     padding: 10,
     position: 'relative',
   },
-  // filtering tag-style button
-  filterTag: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#3B82F6',
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 20,
-    alignSelf: 'flex-start',
-    marginBottom: 10,
-  },
-  filterTagText: {
-    color: 'white',
-    marginRight: 6,
-    fontWeight: 'bold',
-  },
-  // calendar button
   filterButtonContainer: {
     alignItems: 'flex-end',
     marginBottom: 10,
   },
-  filterButton: {
-    width: 40,
-    height: 40,
-    backgroundColor: '#3B82F6',
-    borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   listContent: {
     paddingBottom: 20,
-  },
-  historyCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: '#FFF',
-    borderRadius: 8,
-    padding: 16,
-    marginVertical: 6,
-  },
-  historyCardContent: {
-    flexDirection: 'column',
-    flex: 1,
-  },
-  dateText: {
-    fontWeight: 'bold',
-    marginBottom: 4,
-  },
-  timeText: {
-    color: '#555',
-    marginBottom: 4,
-  },
-  distanceText: {
-    color: '#333',
-    marginBottom: 4,
-  },
-  speedText: {
-    color: '#333',
   },
   noEventsText: {
     textAlign: 'center',
