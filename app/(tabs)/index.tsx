@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { View, Text, TextInput, Image, Alert, StyleSheet, Pressable } from 'react-native';
+import { View, Text, ScrollView, Image, Alert, StyleSheet, Pressable } from 'react-native';
 import { IntervalView } from '@/components/IntervalView';
 import { IntervalFormView } from '@/components/IntervalFormView'
 import { Interval } from '@/constants/types'
@@ -46,51 +46,55 @@ export default function HomeScreen() {
       />
 
       <View style={styles.configContainer}>
-        <View style={styles.intervalsContainer}>
+        <View style={styles.workoutContainer}>
           <Text style={{
             fontWeight: 'bold',
             fontSize: 20,
             }}>
-            Intervals
+            Workout Configuration
           </Text>
 
-          <View style={styles.headingsContainer}>
-            <Text>Int</Text>
-            <Text>Speed</Text>
-            <Text>Distance</Text>
-          </View>
+          <ScrollView>
+            <View style={styles.intervalsContainer}>
+              <View style={styles.headingsContainer}>
+                <Text>Int</Text>
+                <Text>Speed</Text>
+                <Text>Distance</Text>
+              </View>
 
-          {intervals.map((interval) => (
-            <IntervalView
-              key={interval.index} // necessary for React to manipulate the DOM
-              interval={interval}
-              onEditSubmit={(newSpeed: number, newDistance: number) => handleIntervalSubmit(interval.index, newSpeed, newDistance)}
-              />
-          ))}
+              {intervals.map((interval) => (
+                <IntervalView
+                  key={interval.index} // necessary for React to manipulate the DOM
+                  interval={interval}
+                  onEditSubmit={(newSpeed: number, newDistance: number) => handleIntervalSubmit(interval.index, newSpeed, newDistance)}
+                  />
+              ))}
 
 
-          {showingIntervalFormView && // Conditionally render form
-            <IntervalFormView
-              index={intervals.length + 1}
-              defaultSpeed={NaN}
-              defaultDist={NaN}
-              onSubmit={(newSpeed: number, newDistance: number) => handleIntervalSubmit(intervals.length + 1, newSpeed, newDistance)}
-              />
-          }
+              {showingIntervalFormView && // Conditionally render form
+                <IntervalFormView
+                  index={intervals.length + 1}
+                  defaultSpeed={NaN}
+                  defaultDist={NaN}
+                  onSubmit={(newSpeed: number, newDistance: number) => handleIntervalSubmit(intervals.length + 1, newSpeed, newDistance)}
+                  />
+              }
 
-        
-          <Pressable
-            style={styles.addIntervalButton}
-            onPress={() => setShowingIntervalFormView(true)}
-            >
-            <Image
-              style={{height: '100%', width: 30}}
-              source={require('../../assets/images/plus-icon.png')}
-              resizeMode='contain'
-              />
+            
+              <Pressable
+                style={styles.addIntervalButton}
+                onPress={() => setShowingIntervalFormView(true)}
+                >
+                <Image
+                  style={{height: '100%', width: 30}}
+                  source={require('../../assets/images/plus-icon.png')}
+                  resizeMode='contain'
+                  />
 
-            <Text style={{color: garminBlue}}>Add Interval</Text>
-          </Pressable>
+                <Text style={{color: garminBlue}}>Add Interval</Text>
+              </Pressable>  
+            </View>
+          </ScrollView>
         </View>
 
         <View style={styles.buttonsContainer}>
@@ -135,11 +139,16 @@ const styles = StyleSheet.create({
     gap: 20,
     backgroundColor: 'lightgray',
   },
-  intervalsContainer: {
-    padding: 20,
+  workoutContainer: {
     flex: 1,
     gap: 10,
+    padding: 20,
     borderRadius: 15,
+    backgroundColor: 'white',
+  },
+  intervalsContainer: {
+    flex: 1,
+    gap: 10,
     backgroundColor: 'white',
   },
   headingsContainer: {
