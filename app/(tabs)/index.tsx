@@ -37,6 +37,26 @@ export default function HomeScreen() {
     }
   }
 
+  function handleIntervalDeletion(index: number) {
+    // Remove the interval
+    const newIntervals = intervals.filter(int => 
+      int.index != index
+    )
+
+    // Update proceeding intervals' indicies
+    const newIntervals2 = newIntervals.map(int => {
+      if (int.index > index) {
+        // Decrement the interval's index
+        return {index: int.index - 1, speed: int.speed, distance: int.distance};
+      }
+      else {
+        return int;
+      }
+    });
+
+    setIntervals(newIntervals2)
+  }
+
   return (
     <View style={styles.container}>
       <Image
@@ -67,6 +87,7 @@ export default function HomeScreen() {
                   key={interval.index} // necessary for React to manipulate the DOM
                   interval={interval}
                   onEditSubmit={(newSpeed: number, newDistance: number) => handleIntervalSubmit(interval.index, newSpeed, newDistance)}
+                  onDelete={() => handleIntervalDeletion(interval.index)}
                   />
               ))}
 
@@ -77,6 +98,9 @@ export default function HomeScreen() {
                   defaultSpeed={NaN}
                   defaultDist={NaN}
                   onSubmit={(newSpeed: number, newDistance: number) => handleIntervalSubmit(intervals.length + 1, newSpeed, newDistance)}
+                  onDelete={() => {
+                    setShowingIntervalFormView(false);
+                  }}
                   />
               }
 

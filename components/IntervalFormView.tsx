@@ -6,9 +6,10 @@ interface IntervalFormViewProps {
     defaultSpeed: number;
     defaultDist: number;
     onSubmit: (speed: number, distance: number) => void;
+    onDelete: () => void;
 }
 
-export function IntervalFormView({ index, defaultSpeed, defaultDist, onSubmit }: IntervalFormViewProps) {
+export function IntervalFormView({ index, defaultSpeed, defaultDist, onSubmit, onDelete }: IntervalFormViewProps) {
     let defaultSpeedValue: String = '';
     let defaultDistValue: String = '';
 
@@ -39,7 +40,16 @@ export function IntervalFormView({ index, defaultSpeed, defaultDist, onSubmit }:
 
     return (
         <View style={styles.intervalContainer}>
-            <Text>{index}</Text>
+            <Pressable
+                style={styles.button}
+                onPress={() => onDelete()}
+                >
+                <Image 
+                    style={{flex: 1}}
+                    source={require('../assets/images/trashcan-icon.png')}
+                    resizeMode='contain'
+                    />
+            </Pressable>
 
             <TextInput
                 style={styles.textInput}

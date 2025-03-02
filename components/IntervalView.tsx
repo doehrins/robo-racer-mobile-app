@@ -7,10 +7,11 @@ import { IntervalFormView } from './IntervalFormView';
 interface IntervalViewProps {
   interval: Interval;
   onEditSubmit: (speed: number, distance: number) => void
+  onDelete: () => void
 }
 
 
-export function IntervalView({ interval, onEditSubmit }: IntervalViewProps) {
+export function IntervalView({ interval, onEditSubmit, onDelete }: IntervalViewProps) {
   const [showingFormView, setShowingFormView] = useState(false);
 
   return (
@@ -41,6 +42,10 @@ export function IntervalView({ interval, onEditSubmit }: IntervalViewProps) {
           onSubmit={(newSpeed: number, newDistance: number) => {
             setShowingFormView(false);
             onEditSubmit(newSpeed, newDistance);
+          }}
+          onDelete={() => {
+            setShowingFormView(false)
+            onDelete()
           }}
         />
       }
