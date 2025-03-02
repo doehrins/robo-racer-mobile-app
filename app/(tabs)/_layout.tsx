@@ -42,13 +42,6 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="connect"
-        options={{
-          title: 'Connect',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="dot.radiowaves.left.and.right" color={color} />,
-        }}
-      />
-      <Tabs.Screen
         name="history"
         options={{
           title: 'History',
