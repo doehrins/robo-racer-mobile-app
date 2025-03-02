@@ -7,19 +7,19 @@ import { garminBlue } from '@/constants/Colors'
 
 
 const initialIntervals: Interval[] = [
-  {index: 1, speed: 1.0, distance: 20},
-  {index: 2, speed: 5.0, distance: 100},
-  {index: 3, speed: 8.0, distance: 2000},
+  {index: 1, time: 1.0, distance: 20},
+  {index: 2, time: 5.0, distance: 100},
+  {index: 3, time: 8.0, distance: 2000},
 ]
 
 export default function HomeScreen() {
   const [intervals, setIntervals] = useState(initialIntervals)
   const [showingIntervalFormView, setShowingIntervalFormView] = useState(false)
 
-  function handleIntervalSubmit(index: number, newSpeed: number, newDistance: number) {
+  function handleIntervalSubmit(index: number, newTime: number, newDistance: number) {
     // If adding a new interval
     if (index == intervals.length + 1) {
-      setIntervals([...intervals, {index: index, speed: newSpeed, distance: newDistance}]);
+      setIntervals([...intervals, {index: index, time: newTime, distance: newDistance}]);
       setShowingIntervalFormView(false);
     }
     // If editing an existing interval
@@ -27,7 +27,7 @@ export default function HomeScreen() {
       const newIntervals = intervals.map((interval, i) => {
         if (i == index - 1) {
           // Insert edited interval in proper location
-          return {index: index, speed: newSpeed, distance: newDistance};
+          return {index: index, time: newTime, distance: newDistance};
         }
         else {
           return interval;
@@ -47,7 +47,7 @@ export default function HomeScreen() {
     const newIntervals2 = newIntervals.map(int => {
       if (int.index > index) {
         // Decrement the interval's index
-        return {index: int.index - 1, speed: int.speed, distance: int.distance};
+        return {index: int.index - 1, time: int.time, distance: int.distance};
       }
       else {
         return int;
@@ -78,15 +78,15 @@ export default function HomeScreen() {
             <View style={styles.intervalsContainer}>
               <View style={styles.headingsContainer}>
                 <Text>Int</Text>
-                <Text>Speed</Text>
-                <Text>Distance</Text>
+                <Text>Distance (m)</Text>
+                <Text>Time (sec)</Text>
               </View>
 
               {intervals.map((interval) => (
                 <IntervalView
                   key={interval.index} // necessary for React to manipulate the DOM
                   interval={interval}
-                  onEditSubmit={(newSpeed: number, newDistance: number) => handleIntervalSubmit(interval.index, newSpeed, newDistance)}
+                  onEditSubmit={(newTime: number, newDistance: number) => handleIntervalSubmit(interval.index, newTime, newDistance)}
                   onDelete={() => handleIntervalDeletion(interval.index)}
                   />
               ))}
@@ -95,9 +95,9 @@ export default function HomeScreen() {
               {showingIntervalFormView && // Conditionally render form
                 <IntervalFormView
                   index={intervals.length + 1}
-                  defaultSpeed={NaN}
+                  defaultTime={NaN}
                   defaultDist={NaN}
-                  onSubmit={(newSpeed: number, newDistance: number) => handleIntervalSubmit(intervals.length + 1, newSpeed, newDistance)}
+                  onSubmit={(newTime: number, newDistance: number) => handleIntervalSubmit(intervals.length + 1, newTime, newDistance)}
                   onDelete={() => {
                     setShowingIntervalFormView(false);
                   }}
@@ -179,7 +179,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
     paddingHorizontal: 15,
     flexDirection: 'row',
-    gap: 30,
+    gap: 18,
   },
   addIntervalButton: {
     height: 40,
