@@ -10,8 +10,8 @@ interface IntervalFormViewProps {
 }
 
 export function IntervalFormView({ index, defaultTime, defaultDist, onSubmit, onDelete }: IntervalFormViewProps) {
-    let defaultTimeValue: String = '';
-    let defaultDistValue: String = '';
+    let defaultTimeValue: string = '';
+    let defaultDistValue: string = '';
 
     // Check if form is in edit mode
     if (!Number.isNaN(defaultTime) && !Number.isNaN(defaultDist)) {
@@ -54,22 +54,22 @@ export function IntervalFormView({ index, defaultTime, defaultDist, onSubmit, on
             <TextInput
                 style={styles.textInput}
                 keyboardType='numeric'
-                value={time}
-                placeholder='0.0'
-                placeholderTextColor={'lightgray'}
-                textAlign='center'
-                onChangeText={newTime => setTime(newTime)}
-                />
-
-            <TextInput
-                style={styles.textInput}
-                keyboardType='numeric'
                 value={distance}
                 placeholder='0'
                 placeholderTextColor={'lightgray'}
                 textAlign='center'
                 onChangeText={newDistance => setDistance(newDistance)}
-                />
+            />
+
+            <TextInput
+                style={styles.textInput}
+                keyboardType='numeric'
+                value={time}
+                placeholder='0.0'
+                placeholderTextColor={'lightgray'}
+                textAlign='center'
+                onChangeText={newTime => setTime(newTime)}
+            />
 
             <Pressable
                 style={styles.button}
