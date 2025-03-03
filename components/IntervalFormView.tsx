@@ -3,52 +3,62 @@ import { View, Text, TextInput, Image, Alert, StyleSheet, Pressable } from 'reac
 
 interface IntervalFormViewProps {
     index: number;
-    defaultSpeed: number;
+    defaultTime: number;
     defaultDist: number;
-    onSubmit: (speed: number, distance: number) => void;
+    onSubmit: (time: number, distance: number) => void;
+    onDelete: () => void;
 }
 
-export function IntervalFormView({ index, defaultSpeed, defaultDist, onSubmit }: IntervalFormViewProps) {
-    let defaultSpeedValue: String = '';
+export function IntervalFormView({ index, defaultTime, defaultDist, onSubmit, onDelete }: IntervalFormViewProps) {
+    let defaultTimeValue: String = '';
     let defaultDistValue: String = '';
 
     // Check if form is in edit mode
-    if (!Number.isNaN(defaultSpeed) && !Number.isNaN(defaultDist)) {
+    if (!Number.isNaN(defaultTime) && !Number.isNaN(defaultDist)) {
         // Populate existing data
-        defaultSpeedValue = defaultSpeed.toString();
+        defaultTimeValue = defaultTime.toString();
         defaultDistValue = defaultDist.toString();
     }
 
-    const [speed, setSpeed] = useState(defaultSpeedValue);
+    const [time, setTime] = useState(defaultTimeValue);
     const [distance, setDistance] = useState(defaultDistValue);
 
 
-    function handleIntervalSubmit(speed: String, distance: String) {
+    function handleIntervalSubmit(time: String, distance: String) {
         // Validate input
-        let speedVal = Number(speed)
+        let timeVal = Number(time)
         let distanceVal = Number(distance)
 
-        if (!speedVal || !distanceVal) {
-            Alert.alert(`invalid speed or distance`)
+        if (!timeVal || !distanceVal) {
+            Alert.alert(`invalid time or distance`)
             return
         }
 
         // Pass new interval data back up to parent
-        onSubmit(speedVal, distanceVal)
+        onSubmit(timeVal, distanceVal)
     }
 
     return (
         <View style={styles.intervalContainer}>
-            <Text>{index}</Text>
+            <Pressable
+                style={styles.button}
+                onPress={() => onDelete()}
+                >
+                <Image 
+                    style={{flex: 1}}
+                    source={require('../assets/images/trashcan-icon.png')}
+                    resizeMode='contain'
+                    />
+            </Pressable>
 
             <TextInput
                 style={styles.textInput}
                 keyboardType='numeric'
-                value={speed}
+                value={time}
                 placeholder='0.0'
                 placeholderTextColor={'lightgray'}
                 textAlign='center'
-                onChangeText={newSpeed => setSpeed(newSpeed)}
+                onChangeText={newTime => setTime(newTime)}
                 />
 
             <TextInput
@@ -63,7 +73,7 @@ export function IntervalFormView({ index, defaultSpeed, defaultDist, onSubmit }:
 
             <Pressable
                 style={styles.button}
-                onPress={() => handleIntervalSubmit(speed, distance)}
+                onPress={() => handleIntervalSubmit(time, distance)}
                 >
                 <Image
                     style={{flex: 1}}

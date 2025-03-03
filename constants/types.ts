@@ -2,6 +2,6 @@
 
 export interface Interval {
     index: number;
-    speed: number;
-    distance: number;
+    time: number; // duration in seconds
+    distance: number; // distance in meters
 }
