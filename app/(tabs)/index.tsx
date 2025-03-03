@@ -18,6 +18,7 @@ export default function HomeScreen() {
   const [showingIntervalFormView, setShowingIntervalFormView] = useState(false)
   const [bluetoothConnectionEstablished, setBluetoothConnectionEstablished] = useState(false)
   const [configurationSuccess, setConfigurationSuccess] = useState(false)
+  const [workoutSaved, setWorkoutSaved] = useState(false)
 
   function handleIntervalSubmit(index: number, newTime: number, newDistance: number) {
     // If adding a new interval
@@ -38,6 +39,7 @@ export default function HomeScreen() {
       });
       setIntervals(newIntervals)
     }
+    setWorkoutSaved(false)
   }
 
   function handleIntervalDeletion(index: number) {
@@ -58,6 +60,7 @@ export default function HomeScreen() {
     });
 
     setIntervals(newIntervals2)
+    setWorkoutSaved(false)
   }
 
   return (
@@ -72,12 +75,25 @@ export default function HomeScreen() {
 
       <View style={styles.configContainer}>
         <View style={styles.workoutContainer}>
-          <Text style={{
-            fontWeight: 'bold',
-            fontSize: 20,
-          }}>
-            Workout Configuration
-          </Text>
+          <View style={styles.titleContainer}>
+            <Text style={{
+              fontWeight: 'bold',
+              fontSize: 20,
+            }}>
+              Workout Configuration
+            </Text>
+
+            {workoutSaved &&
+              <Image
+                source={require('../../assets/images/circle-checkmark-icon.png')}
+                resizeMode='contain'
+                style={{
+                  height: 25,
+                  paddingRight: 10
+                }}
+              />
+            }
+          </View>
 
           {!configurationSuccess &&
             <ScrollView>
@@ -192,7 +208,7 @@ export default function HomeScreen() {
                     {
                         text: "Save",
                         onPress: () => {
-                          console.log("Save button pressed")
+                          setWorkoutSaved(true)
                         },
                         style: 'default'
                     }
@@ -254,6 +270,9 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 15,
     backgroundColor: 'white',
+  },
+  titleContainer: {
+    flexDirection: 'row',
   },
   intervalsContainer: {
     flex: 1,
