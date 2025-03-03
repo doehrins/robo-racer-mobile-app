@@ -43,7 +43,7 @@ export function IntervalView({ interval, onEditSubmit, onDelete }: IntervalViewP
             setShowingFormView(false);
             onEditSubmit(newTime, newDistance);
           }}
-          onDelete={() => {
+          onDelete={() => 
             Alert.alert(
               "Delete?",
               "Are you sure you want to delete this interval?",
@@ -63,7 +63,7 @@ export function IntervalView({ interval, onEditSubmit, onDelete }: IntervalViewP
               ],
               { cancelable: false }
             )
-          }}
+          }
         />
       }
     </>

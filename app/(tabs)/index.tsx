@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { View, Text, ScrollView, Image, Alert, StyleSheet, Pressable } from 'react-native';
 import { IntervalView } from '@/components/IntervalView';
 import { IntervalFormView } from '@/components/IntervalFormView'
+import { ConnectionView } from '@/components/ConnectionView'
 import { Interval } from '@/constants/types'
 import { garminBlue } from '@/constants/Colors'
 
@@ -15,6 +16,7 @@ const initialIntervals: Interval[] = [
 export default function HomeScreen() {
   const [intervals, setIntervals] = useState(initialIntervals)
   const [showingIntervalFormView, setShowingIntervalFormView] = useState(false)
+  const [bluetoothConnectionEstablished, setBluetoothConnectionEstablished] = useState(false)
 
   function handleIntervalSubmit(index: number, newTime: number, newDistance: number) {
     // If adding a new interval
@@ -63,14 +65,16 @@ export default function HomeScreen() {
         style={styles.logo}
         source={require("../../assets/images/garmin-logo.png")}
         resizeMode="contain" // scales image to fit within the given height and width without cropping
-      />
+        />
+
+      <ConnectionView onConnection={() => setBluetoothConnectionEstablished(true)}/>
 
       <View style={styles.configContainer}>
         <View style={styles.workoutContainer}>
           <Text style={{
             fontWeight: 'bold',
             fontSize: 20,
-            }}>
+          }}>
             Workout Configuration
           </Text>
 
@@ -84,24 +88,24 @@ export default function HomeScreen() {
 
               {intervals.map((interval) => (
                 <IntervalView
-                  key={interval.index} // necessary for React to manipulate the DOM
-                  interval={interval}
-                  onEditSubmit={(newTime: number, newDistance: number) => handleIntervalSubmit(interval.index, newTime, newDistance)}
-                  onDelete={() => handleIntervalDeletion(interval.index)}
-                  />
+                key={interval.index} // necessary for React to manipulate the DOM
+                interval={interval}
+                onEditSubmit={(newTime: number, newDistance: number) => handleIntervalSubmit(interval.index, newTime, newDistance)}
+                onDelete={() => handleIntervalDeletion(interval.index)}
+                />
               ))}
 
 
               {showingIntervalFormView && // Conditionally render form
                 <IntervalFormView
-                  index={intervals.length + 1}
-                  defaultTime={NaN}
-                  defaultDist={NaN}
-                  onSubmit={(newTime: number, newDistance: number) => handleIntervalSubmit(intervals.length + 1, newTime, newDistance)}
-                  onDelete={() => {
-                    setShowingIntervalFormView(false);
-                  }}
-                  />
+                index={intervals.length + 1}
+                defaultTime={NaN}
+                defaultDist={NaN}
+                onSubmit={(newTime: number, newDistance: number) => handleIntervalSubmit(intervals.length + 1, newTime, newDistance)}
+                onDelete={() => {
+                  setShowingIntervalFormView(false);
+                }}
+                />
               }
 
             
@@ -123,17 +127,59 @@ export default function HomeScreen() {
 
         <View style={styles.buttonsContainer}>
           <Pressable
-            style={styles.button}
-            onPress={() => Alert.alert("Save button pressed")}
+            style={bluetoothConnectionEstablished ? styles.button : styles.disabledButton}
+            onPress={() => {
+              if (bluetoothConnectionEstablished) {
+                Alert.alert(
+                  "Configure Robot?",
+                  "Ready to configure the robot with this workout?",
+                  [
+                    {
+                        text: "Cancel",
+                        style: 'cancel'
+                    },
+                    {
+                        text: "Configure",
+                        onPress: () => {
+                          console.log("Configure button pressed")
+                        },
+                        style: 'default'
+                    }
+                  ],
+                  { cancelable: false }
+                )
+              } else {
+                Alert.alert("Establish connection to robot first!")
+              }
+            }}
             >
-            <Text style={styles.buttonText}>Save</Text>
+            <Text style={styles.buttonText}>Configure Robot</Text>
           </Pressable>
 
           <Pressable
             style={styles.button}
-            onPress={() => Alert.alert("Add to Profile button pressed")}
+            onPress={() => 
+              Alert.alert(
+                "Save Workout?",
+                "Are you sure you want to save this workout to your profile?",
+                [
+                  {
+                      text: "Cancel",
+                      style: 'cancel'
+                  },
+                  {
+                      text: "Save",
+                      onPress: () => {
+                        console.log("Save button pressed")
+                      },
+                      style: 'default'
+                  }
+                ],
+                { cancelable: false }
+              )
+            }
             >
-            <Text style={styles.buttonText}>Add to Profile</Text>
+            <Text style={styles.buttonText}>Save to Profile</Text>
           </Pressable>
         </View>
       </View>
@@ -157,8 +203,9 @@ const styles = StyleSheet.create({
   },
   configContainer: {
     width: '100%',
-    height: 600,
+    flex: 1,
     padding: 20,
+    marginBottom: 90,
     borderRadius: 20,
     gap: 20,
     backgroundColor: 'lightgray',
@@ -203,6 +250,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: garminBlue,
+  },
+  disabledButton: {
+    padding: 10,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#4883a3',
+    opacity: 0.7
   },
   buttonText: {
     color: 'white'
