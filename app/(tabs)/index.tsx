@@ -127,9 +127,9 @@ export default function HomeScreen() {
 
         <View style={styles.buttonsContainer}>
           <Pressable
-            style={bluetoothConnectionEstablished ? styles.button : styles.disabledButton}
+            style={(bluetoothConnectionEstablished && intervals.length > 0) ? styles.button : styles.disabledButton}
             onPress={() => {
-              if (bluetoothConnectionEstablished) {
+              if (bluetoothConnectionEstablished && (intervals.length > 0)) {
                 Alert.alert(
                   "Configure Robot?",
                   "Ready to configure the robot with this workout?",
@@ -148,8 +148,13 @@ export default function HomeScreen() {
                   ],
                   { cancelable: false }
                 )
-              } else {
+              }
+              else if (!bluetoothConnectionEstablished) {
                 Alert.alert("Establish connection to robot first!")
+              }
+              else {
+                // Connection established, but no intervals added to workout
+                Alert.alert("Add intervals to workout!")
               }
             }}
             >
@@ -157,26 +162,33 @@ export default function HomeScreen() {
           </Pressable>
 
           <Pressable
-            style={styles.button}
-            onPress={() => 
-              Alert.alert(
-                "Save Workout?",
-                "Are you sure you want to save this workout to your profile?",
-                [
-                  {
-                      text: "Cancel",
-                      style: 'cancel'
-                  },
-                  {
-                      text: "Save",
-                      onPress: () => {
-                        console.log("Save button pressed")
-                      },
-                      style: 'default'
-                  }
-                ],
-                { cancelable: false }
-              )
+            style={intervals.length > 0 ? styles.button : styles.disabledButton}
+            onPress={() => {
+              if (intervals.length > 0) {
+                Alert.alert(
+                  "Save Workout?",
+                  "Are you sure you want to save this workout to your profile?",
+                  [
+                    {
+                        text: "Cancel",
+                        style: 'cancel'
+                    },
+                    {
+                        text: "Save",
+                        onPress: () => {
+                          console.log("Save button pressed")
+                        },
+                        style: 'default'
+                    }
+                  ],
+                  { cancelable: false }
+                )
+              } else {
+                Alert.alert("Add intervals to workout!")
+              }
+              
+            }
+              
             }
             >
             <Text style={styles.buttonText}>Save to Profile</Text>
