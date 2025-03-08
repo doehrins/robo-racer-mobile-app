@@ -157,7 +157,7 @@ export default function HomeScreen() {
 
         <View style={styles.buttonsContainer}>
           <Pressable
-            style={(bluetoothConnectionEstablished && intervals.length > 0) ? styles.button : styles.disabledButton}
+            style={(!bluetoothConnectionEstablished || intervals.length == 0 || configurationSuccess) ? styles.disabledButton : styles.button}
             disabled={configurationSuccess}
             onPress={() => {
               if (bluetoothConnectionEstablished && (intervals.length > 0)) {
@@ -193,7 +193,7 @@ export default function HomeScreen() {
           </Pressable>
 
           <Pressable
-            style={intervals.length > 0 ? styles.button : styles.disabledButton}
+            style={(intervals.length == 0 || configurationSuccess) ? styles.disabledButton : styles.button}
             disabled={configurationSuccess}
             onPress={() => {
               if (intervals.length > 0) {
@@ -218,10 +218,7 @@ export default function HomeScreen() {
               } else {
                 Alert.alert("Add intervals to workout!")
               }
-              
-            }
-              
-            }
+            }}
             >
             <Text style={styles.buttonText}>Save to Profile</Text>
           </Pressable>
