@@ -106,23 +106,23 @@ export default function HomeScreen() {
 
                 {intervals.map((interval) => (
                   <IntervalView
-                  key={interval.index} // necessary for React to manipulate the DOM
-                  interval={interval}
-                  onEditSubmit={(newTime: number, newDistance: number) => handleIntervalSubmit(interval.index, newTime, newDistance)}
-                  onDelete={() => handleIntervalDeletion(interval.index)}
+                    key={interval.index} // necessary for React to manipulate the DOM
+                    interval={interval}
+                    onEditSubmit={(newTime: number, newDistance: number) => handleIntervalSubmit(interval.index, newTime, newDistance)}
+                    onDelete={() => handleIntervalDeletion(interval.index)}
                   />
                 ))}
 
 
                 {showingIntervalFormView && // Conditionally render form
                   <IntervalFormView
-                  index={intervals.length + 1}
-                  defaultTime={NaN}
-                  defaultDist={NaN}
-                  onSubmit={(newTime: number, newDistance: number) => handleIntervalSubmit(intervals.length + 1, newTime, newDistance)}
-                  onDelete={() => {
-                    setShowingIntervalFormView(false);
-                  }}
+                    index={intervals.length + 1}
+                    defaultTime={NaN}
+                    defaultDist={NaN}
+                    onSubmit={(newTime: number, newDistance: number) => handleIntervalSubmit(intervals.length + 1, newTime, newDistance)}
+                    onDelete={() => {
+                      setShowingIntervalFormView(false);
+                    }}
                   />
                 }
 
