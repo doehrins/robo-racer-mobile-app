@@ -1,14 +1,25 @@
-import { View, Text, StyleSheet } from 'react-native'
+import { View, Text, StyleSheet, Pressable } from 'react-native'
 import { Workout } from '@/constants/types'
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
 
-interface WorkoutCardViewProps {
+type RootStackParamList = {
+    WorkoutDetailScreen: { workoutDetails: WorkoutProps }
+}
+
+interface WorkoutProps {
     workout: Workout
 }
 
-export function WorkoutCardView({ workout }: WorkoutCardViewProps) {
+export function WorkoutCardView({ workout }: WorkoutProps) {
+    const navigation = useNavigation<StackNavigationProp<RootStackParamList>>()
+
     return (
-        <View style={styles.cardContainer}>
+        <Pressable
+            style={styles.cardContainer}
+            onPress={() => navigation.navigate('WorkoutDetailScreen', { workoutDetails: { workout }})}
+        >
             <View style={styles.infoContainer}>
                 <Text style={{
                     fontWeight: 'bold',
@@ -23,7 +34,7 @@ export function WorkoutCardView({ workout }: WorkoutCardViewProps) {
             </View>
 
             <Ionicons name="chevron-forward" size={20} color="#000" />
-        </View>
+        </Pressable>
     )
 }
 
