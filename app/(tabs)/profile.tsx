@@ -32,6 +32,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     flex: 1,
     padding: 20,
+    gap: 20,
   },
   heading: {
     marginTop: 30,
@@ -41,10 +42,13 @@ const styles = StyleSheet.create({
   },
   grayContainer: {
     backgroundColor: 'lightgray',
-    padding: 10,
+    padding: 20,
+    borderRadius: 20,
+    gap: 20
   },
   subHeading: {
     fontSize: 20,
+    fontWeight: '600'
   },
   workoutsContainer: {
     // borderWidth: 4,
