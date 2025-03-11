@@ -1,7 +1,8 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable, Alert } from 'react-native';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import { Workout } from '@/constants/types'
+import { garminBlue } from '@/constants/Colors';
 
 type WorkoutDetailScreenRouteProp = RouteProp<{ params: { workoutDetails: {workout: Workout} }}, 'params'>
 
@@ -46,6 +47,31 @@ const WorkoutDetailScreen = () => {
                         ))}
                     </View>
                 </View>
+
+                <Pressable
+                    style={styles.button}
+                    onPress={() => 
+                        Alert.alert(
+                            "Configure Robot?",
+                            "Are you sure you want to configure the robot with this workout?",
+                            [
+                            {
+                                text: "Cancel",
+                                style: 'cancel'
+                            },
+                            {
+                                text: "Configure",
+                                onPress: () => {
+                                    console.log("configure button pressed")
+                                },
+                                style: 'default'
+                            }
+                            ],
+                            { cancelable: false }
+                        )}
+                >
+                    <Text style={styles.buttonText}>Configure Robot</Text>
+                </Pressable>
             </View>
         </ScrollView>
         
@@ -87,6 +113,17 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         gap: 10,
         backgroundColor: 'white',
+    },
+    button: {
+        backgroundColor: garminBlue,
+        alignItems: 'center',
+        borderRadius: 10,
+        padding: 10,
+        width: '80%',
+        alignSelf: 'center',
+    },
+    buttonText: {
+        color: 'white'
     }
 })
 
