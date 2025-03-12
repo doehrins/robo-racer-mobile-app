@@ -3,14 +3,14 @@ import {
   View,
   Text,
   StyleSheet,
-  FlatList,
-  Image
+  FlatList
 } from 'react-native';
 import EventItem from '@/components/EventItem';
 import FilterTag from '@/components/FilterTag';
 import FilterButton from '@/components/FilterButton';
 import DatePicker from '@/components/DatePicker';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
+import AppLayout from '@/components/AppLayout';
 
 interface State {
   showPicker: boolean;
@@ -30,7 +30,7 @@ export default class HistoryScreen extends React.Component<{}, State> {
     showPicker: false,
     selectedDate: null
   };
-
+  // temporarily hard-coded data
   private historyData: EventItemData[] = [
     { id: '1', date: '02/07/2025', timeRange: '10:34:12 - 10:40:09', distance: '1000 m', avgSpeed: '2.8 m/s' },
     { id: '2', date: '02/08/2025', timeRange: '09:10:00 - 09:25:30', distance: '2000 m', avgSpeed: '3.1 m/s' },
@@ -80,13 +80,7 @@ export default class HistoryScreen extends React.Component<{}, State> {
     const selectedDateString = selectedDate ? this.formatDate(selectedDate) : '';
 
     return (
-      <View style={styles.container}>
-        {/* Garmin logo */}
-        <Image
-          style={styles.logo}
-          source={require("../../assets/images/garmin-logo.png")}
-          resizeMode="contain"
-        />
+      <AppLayout>
         {/* Big gray rectangle */}
         <View style={styles.grayArea}>
           {/* tag-style button for clearing date filter */}
@@ -124,22 +118,12 @@ export default class HistoryScreen extends React.Component<{}, State> {
             onChange={this.onChangeDate}
           />
         )}
-      </View>
+      </AppLayout>
     );
   }
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FFF',
-    padding: 20,
-  },
-  logo: {
-    width: 120,
-    height: 40,
-    marginBottom: 10,
-  },
   grayArea: {
     flex: 1,
     backgroundColor: '#F0F0F0',
