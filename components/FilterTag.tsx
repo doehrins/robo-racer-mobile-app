@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { garminBlue } from '@/constants/Colors';
 
 interface FilterTagProps {
   date: string;
@@ -20,7 +21,7 @@ const styles = StyleSheet.create({
   filterTag: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#3B82F6',
+    backgroundColor: garminBlue,
     paddingVertical: 6,
     paddingHorizontal: 12,
     borderRadius: 20,
