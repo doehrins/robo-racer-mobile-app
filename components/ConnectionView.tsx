@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { View, Text, Image, StyleSheet, Pressable } from 'react-native';
-import { garminBlue } from '@/constants/Colors'
+import { garminBlue } from '@/globals/constants/Colors'
 
 interface ConnectionViewProps {
     onConnection: () => void;

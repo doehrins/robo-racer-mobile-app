@@ -7,6 +7,7 @@ export interface Interval {
 }
 
 export interface Workout {
+    id: number;
     name: string;
     description: string;
     totalDist: number; // distance in meters

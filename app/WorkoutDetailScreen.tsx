@@ -1,14 +1,26 @@
-import React from 'react';
+import { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable, Alert } from 'react-native';
 import { RouteProp, useRoute } from '@react-navigation/native';
-import { Workout } from '@/constants/types'
-import { garminBlue } from '@/constants/Colors';
+import { Workout } from '@/globals/constants/types'
+import { garminBlue } from '@/globals/constants/Colors';
+import { Link, Redirect } from 'expo-router'
 
 type WorkoutDetailScreenRouteProp = RouteProp<{ params: { workoutDetails: {workout: Workout} }}, 'params'>
 
 const WorkoutDetailScreen = () => {
     const route = useRoute<WorkoutDetailScreenRouteProp>()
     const { workout } = route.params.workoutDetails
+
+    const [redirectToConfig, setRedirectToConfig] = useState(false)
+
+    if (redirectToConfig) {
+        return (
+            <Redirect href={{
+                pathname: '/(tabs)',
+                params: { workoutID: workout.id }
+            }} />
+        )
+    }
 
     console.log(workout)
 
@@ -48,30 +60,18 @@ const WorkoutDetailScreen = () => {
                     </View>
                 </View>
 
-                <Pressable
-                    style={styles.button}
-                    onPress={() => 
-                        Alert.alert(
-                            "Configure Robot?",
-                            "Are you sure you want to configure the robot with this workout?",
-                            [
-                            {
-                                text: "Cancel",
-                                style: 'cancel'
-                            },
-                            {
-                                text: "Configure",
-                                onPress: () => {
-                                    console.log("configure button pressed")
-                                },
-                                style: 'default'
-                            }
-                            ],
-                            { cancelable: false }
-                        )}
+                <Link
+                    dismissTo // goes back in navigation stack until it reaches specified route
+                    href={{
+                        pathname: '/(tabs)', // config (home) screen
+                        params: { id: workout.id } // pass workout id
+                    }}
+                    asChild // forwards link props to pressable child component
                 >
-                    <Text style={styles.buttonText}>Configure Robot</Text>
-                </Pressable>
+                    <Pressable style={styles.button}>
+                        <Text style={styles.buttonText}>Configure Robot</Text>
+                    </Pressable>
+                </Link>
             </View>
         </ScrollView>
         

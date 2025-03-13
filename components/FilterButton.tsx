@@ -1,7 +1,7 @@
 import React from 'react';
 import { TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { garminBlue } from '@/constants/Colors'
+import { garminBlue } from '@/globals/constants/Colors'
 
 interface FilterButtonProps {
   onPress: () => void;
