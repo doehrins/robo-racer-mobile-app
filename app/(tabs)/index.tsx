@@ -9,7 +9,6 @@ import workouts from '@/globals/workouts'
 import { useLocalSearchParams } from 'expo-router';
 
 
-var renderSavedWorkout: Boolean = true
 var prevWorkoutID: number = -1
 
 export default function HomeScreen() {

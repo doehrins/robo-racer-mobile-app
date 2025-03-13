@@ -1,28 +1,14 @@
-import { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable, Alert } from 'react-native';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import { Workout } from '@/globals/constants/types'
 import { garminBlue } from '@/globals/constants/Colors';
-import { Link, Redirect } from 'expo-router'
+import { Link } from 'expo-router'
 
 type WorkoutDetailScreenRouteProp = RouteProp<{ params: { workoutDetails: {workout: Workout} }}, 'params'>
 
 const WorkoutDetailScreen = () => {
     const route = useRoute<WorkoutDetailScreenRouteProp>()
     const { workout } = route.params.workoutDetails
-
-    const [redirectToConfig, setRedirectToConfig] = useState(false)
-
-    if (redirectToConfig) {
-        return (
-            <Redirect href={{
-                pathname: '/(tabs)',
-                params: { workoutID: workout.id }
-            }} />
-        )
-    }
-
-    console.log(workout)
 
     return (
         <ScrollView style={styles.scrollView}>
