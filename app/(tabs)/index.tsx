@@ -3,22 +3,30 @@ import { View, Text, ScrollView, Image, Alert, StyleSheet, Pressable } from 'rea
 import { IntervalView } from '@/components/IntervalView';
 import { IntervalFormView } from '@/components/IntervalFormView'
 import { ConnectionView } from '@/components/ConnectionView'
-import { Interval } from '@/constants/types'
-import { garminBlue } from '@/constants/Colors'
+import { Interval } from '@/globals/constants/types'
+import { garminBlue } from '@/globals/constants/Colors'
+import workouts from '@/globals/workouts'
+import { useLocalSearchParams } from 'expo-router';
 
 
-const initialIntervals: Interval[] = [
-  {index: 1, time: 1.0, distance: 20},
-  {index: 2, time: 5.0, distance: 100},
-  {index: 3, time: 8.0, distance: 2000},
-]
+var prevWorkoutID: number = -1
 
 export default function HomeScreen() {
-  const [intervals, setIntervals] = useState(initialIntervals)
+  const [intervals, setIntervals] = useState<Interval[]>([])
+  const [workoutSaved, setWorkoutSaved] = useState(false)
   const [showingIntervalFormView, setShowingIntervalFormView] = useState(false)
   const [bluetoothConnectionEstablished, setBluetoothConnectionEstablished] = useState(false)
   const [configurationSuccess, setConfigurationSuccess] = useState(false)
-  const [workoutSaved, setWorkoutSaved] = useState(false)
+
+  const { id } = useLocalSearchParams()
+  const workoutID: number = id ? Number(id) : -1 // convert to integer, search params are passed as strings
+
+  // If user is importing a saved workout to config screen
+  if (workoutID != prevWorkoutID) {
+    prevWorkoutID = workoutID // update so component re-renders appropriately
+    setIntervals(workouts[workoutID - 1].intervals)
+    setWorkoutSaved(true)
+  }
 
   function handleIntervalSubmit(index: number, newTime: number, newDistance: number) {
     // If adding a new interval
@@ -106,23 +114,23 @@ export default function HomeScreen() {
 
                 {intervals.map((interval) => (
                   <IntervalView
-                  key={interval.index} // necessary for React to manipulate the DOM
-                  interval={interval}
-                  onEditSubmit={(newTime: number, newDistance: number) => handleIntervalSubmit(interval.index, newTime, newDistance)}
-                  onDelete={() => handleIntervalDeletion(interval.index)}
+                    key={interval.index} // necessary for React to manipulate the DOM
+                    interval={interval}
+                    onEditSubmit={(newTime: number, newDistance: number) => handleIntervalSubmit(interval.index, newTime, newDistance)}
+                    onDelete={() => handleIntervalDeletion(interval.index)}
                   />
                 ))}
 
 
                 {showingIntervalFormView && // Conditionally render form
                   <IntervalFormView
-                  index={intervals.length + 1}
-                  defaultTime={NaN}
-                  defaultDist={NaN}
-                  onSubmit={(newTime: number, newDistance: number) => handleIntervalSubmit(intervals.length + 1, newTime, newDistance)}
-                  onDelete={() => {
-                    setShowingIntervalFormView(false);
-                  }}
+                    index={intervals.length + 1}
+                    defaultTime={NaN}
+                    defaultDist={NaN}
+                    onSubmit={(newTime: number, newDistance: number) => handleIntervalSubmit(intervals.length + 1, newTime, newDistance)}
+                    onDelete={() => {
+                      setShowingIntervalFormView(false);
+                    }}
                   />
                 }
 

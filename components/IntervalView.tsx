@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { View, Text, Image, Alert, StyleSheet, Pressable } from 'react-native';
-import { Interval } from '@/constants/types'
+import { Interval } from '@/globals/constants/types'
 import { IntervalFormView } from './IntervalFormView';
 
 

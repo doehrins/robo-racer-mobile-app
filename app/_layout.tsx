@@ -7,6 +7,7 @@ import { useEffect } from 'react';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/useColorScheme';
+import WorkoutDetailScreen from './WorkoutDetailScreen';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -32,6 +33,7 @@ export default function RootLayout() {
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="EventDetail" options={{ title: 'Event Detail' }} />
+        <Stack.Screen name="WorkoutDetailScreen"/>
         <Stack.Screen name="+not-found" />
       </Stack>
       <StatusBar style="auto" />
