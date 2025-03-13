@@ -1,14 +1,14 @@
 import { View, Text, StyleSheet, ScrollView, Pressable, Alert } from 'react-native';
-import { RouteProp, useRoute } from '@react-navigation/native';
 import { Workout } from '@/globals/constants/types'
 import { garminBlue } from '@/globals/constants/Colors';
-import { Link } from 'expo-router'
-
-type WorkoutDetailScreenRouteProp = RouteProp<{ params: { workoutDetails: {workout: Workout} }}, 'params'>
+import { Link, useLocalSearchParams } from 'expo-router'
+import workouts from '@/globals/workouts'
 
 const WorkoutDetailScreen = () => {
-    const route = useRoute<WorkoutDetailScreenRouteProp>()
-    const { workout } = route.params.workoutDetails
+    const { id } = useLocalSearchParams();
+    const workoutID = Number(id)
+
+    const workout = workouts[workoutID - 1]
 
     return (
         <ScrollView style={styles.scrollView}>

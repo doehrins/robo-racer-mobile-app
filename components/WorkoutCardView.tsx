@@ -1,40 +1,41 @@
 import { View, Text, StyleSheet, Pressable } from 'react-native'
 import { Workout } from '@/globals/constants/types'
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
+import { Link } from 'expo-router'
 
-type RootStackParamList = {
-    WorkoutDetailScreen: { workoutDetails: WorkoutProps }
-}
 
 interface WorkoutProps {
     workout: Workout
 }
 
 export function WorkoutCardView({ workout }: WorkoutProps) {
-    const navigation = useNavigation<StackNavigationProp<RootStackParamList>>()
 
     return (
-        <Pressable
-            style={styles.cardContainer}
-            onPress={() => navigation.navigate('WorkoutDetailScreen', { workoutDetails: { workout }})}
+        <Link 
+            href={{
+                pathname: '/WorkoutDetailScreen',
+                params: { id: workout.id }
+            }}
+            asChild
         >
-            <View style={styles.infoContainer}>
-                <Text style={{
-                    fontWeight: 'bold',
-                    fontSize: 18,
-                    marginBottom: 5,
-                }}>
-                    {workout.name}
-                </Text>
-                <Text>Total Distance: {workout.totalDist}m</Text>
-                <Text>Total Time: {workout.totalTime} sec</Text>
-                <Text>Intervals: {workout.numIntervals}</Text>
-            </View>
+            <Pressable style={styles.cardContainer}>
+                <View style={styles.infoContainer}>
+                    <Text style={{
+                        fontWeight: 'bold',
+                        fontSize: 18,
+                        marginBottom: 5,
+                    }}>
+                        {workout.name}
+                    </Text>
+                    <Text>Total Distance: {workout.totalDist}m</Text>
+                    <Text>Total Time: {workout.totalTime} sec</Text>
+                    <Text>Intervals: {workout.numIntervals}</Text>
+                </View>
 
-            <Ionicons name="chevron-forward" size={20} color="#000" />
-        </Pressable>
+                <Ionicons name="chevron-forward" size={20} color="#000" />
+            </Pressable>
+        </Link>
+        
     )
 }
 
