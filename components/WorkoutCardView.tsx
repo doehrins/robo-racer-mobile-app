@@ -1,20 +1,19 @@
 import { View, Text, StyleSheet, Pressable } from 'react-native'
-import { Workout } from '@/globals/constants/types'
+import { WorkoutDetails } from '@/globals/constants/types'
 import { Ionicons } from '@expo/vector-icons';
 import { Link } from 'expo-router'
 
 
 interface WorkoutProps {
-    workout: Workout
+    workoutDetails: WorkoutDetails;
 }
 
-export function WorkoutCardView({ workout }: WorkoutProps) {
-
+export function WorkoutCardView({ workoutDetails }: WorkoutProps) {
     return (
         <Link 
             href={{
                 pathname: '/WorkoutDetailScreen',
-                params: { id: workout.id }
+                params: { id: workoutDetails.id }
             }}
             asChild
         >
@@ -25,11 +24,11 @@ export function WorkoutCardView({ workout }: WorkoutProps) {
                         fontSize: 18,
                         marginBottom: 5,
                     }}>
-                        {workout.name}
+                        {workoutDetails.name}
                     </Text>
-                    <Text>Total Distance: {workout.totalDist}m</Text>
-                    <Text>Total Time: {workout.totalTime} sec</Text>
-                    <Text>Intervals: {workout.numIntervals}</Text>
+                    <Text>Total Distance: {workoutDetails.totalDist}m</Text>
+                    <Text>Total Time: {workoutDetails.totalTime} sec</Text>
+                    <Text>Intervals: {workoutDetails.numIntervals}</Text>
                 </View>
 
                 <Ionicons name="chevron-forward" size={20} color="#000" />

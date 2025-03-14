@@ -1,10 +1,29 @@
 import { StyleSheet, Image, ScrollView, View, Text} from 'react-native';
-import { Workout } from '@/globals/constants/types'
+import { WorkoutDetails } from '@/globals/constants/types'
 import { WorkoutCardView } from '@/components/WorkoutCardView'
-import workouts from '@/globals/workouts'
+import { useSQLiteContext } from 'expo-sqlite';
+import { useState, useCallback } from 'react'
+import { useFocusEffect } from 'expo-router';
+
 
 
 export default function TabTwoScreen() {
+  const db = useSQLiteContext();
+  const [workouts, setWorkouts] = useState<WorkoutDetails[]>([])
+
+  const loadData = async() => {
+    const result = await db.getAllAsync<WorkoutDetails>('SELECT * FROM Workouts;');
+    setWorkouts(result);
+  }
+
+  // Weird React magic... I think it prevents the loadData
+  // function from being called when the component re-renders
+  useFocusEffect(
+    useCallback(() => {
+      loadData();
+    }, [])
+  );
+
   return (
     <View style={styles.container}>
       <Text style={styles.heading}>Profile</Text>
@@ -17,7 +36,7 @@ export default function TabTwoScreen() {
             {workouts.map((w, idx) => (
               <WorkoutCardView
                 key={idx}
-                workout={w}
+                workoutDetails={w}
               />
             ))}
           </View>

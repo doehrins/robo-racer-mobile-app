@@ -1,17 +1,23 @@
 // This file is to define types needed by multiple different files
 
-export interface Interval {
-    index: number;
+export type Interval = {
+    workoutID: number;
+    idx: number;
     time: number; // duration in seconds
     distance: number; // distance in meters
 }
 
-export interface Workout {
+export type WorkoutDetails = {
     id: number;
     name: string;
     description: string;
     totalDist: number; // distance in meters
     totalTime: number; // duration in seconds
     numIntervals: number;
+    savedToProfile: boolean;
+}
+
+export type Workout = {
+    workoutDetails: WorkoutDetails;
     intervals: Interval[];
 }

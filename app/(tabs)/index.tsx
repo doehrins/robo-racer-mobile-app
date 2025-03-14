@@ -5,7 +5,6 @@ import { IntervalFormView } from '@/components/IntervalFormView'
 import { ConnectionView } from '@/components/ConnectionView'
 import { Interval } from '@/globals/constants/types'
 import { garminBlue } from '@/globals/constants/Colors'
-import workouts from '@/globals/workouts'
 import { useLocalSearchParams } from 'expo-router';
 
 
@@ -24,14 +23,14 @@ export default function HomeScreen() {
   // If user is importing a saved workout to config screen
   if (workoutID != prevWorkoutID) {
     prevWorkoutID = workoutID // update so component re-renders appropriately
-    setIntervals(workouts[workoutID - 1].intervals)
+    // setIntervals(workouts[workoutID - 1].intervals)
     setWorkoutSaved(true)
   }
 
   function handleIntervalSubmit(index: number, newTime: number, newDistance: number) {
     // If adding a new interval
     if (index == intervals.length + 1) {
-      setIntervals([...intervals, {index: index, time: newTime, distance: newDistance}]);
+      setIntervals([...intervals, {workoutID: -1, idx: index, time: newTime, distance: newDistance}]);
       setShowingIntervalFormView(false);
     }
     // If editing an existing interval
@@ -39,7 +38,7 @@ export default function HomeScreen() {
       const newIntervals = intervals.map((interval, i) => {
         if (i == index - 1) {
           // Insert edited interval in proper location
-          return {index: index, time: newTime, distance: newDistance};
+          return {workoutID: -1, idx: index, time: newTime, distance: newDistance};
         }
         else {
           return interval;
@@ -53,14 +52,14 @@ export default function HomeScreen() {
   function handleIntervalDeletion(index: number) {
     // Remove the interval
     const newIntervals = intervals.filter(int => 
-      int.index != index
+      int.idx != index
     )
 
     // Update proceeding intervals' indicies
     const newIntervals2 = newIntervals.map(int => {
-      if (int.index > index) {
+      if (int.idx > index) {
         // Decrement the interval's index
-        return {index: int.index - 1, time: int.time, distance: int.distance};
+        return {workoutID: -1, idx: int.idx - 1, time: int.time, distance: int.distance};
       }
       else {
         return int;
@@ -69,6 +68,11 @@ export default function HomeScreen() {
 
     setIntervals(newIntervals2)
     setWorkoutSaved(false)
+  }
+
+  function handleSaveToProfile() {
+
+    setWorkoutSaved(true)
   }
 
   return (
@@ -114,10 +118,10 @@ export default function HomeScreen() {
 
                 {intervals.map((interval) => (
                   <IntervalView
-                    key={interval.index} // necessary for React to manipulate the DOM
+                    key={interval.idx} // necessary for React to manipulate the DOM
                     interval={interval}
-                    onEditSubmit={(newTime: number, newDistance: number) => handleIntervalSubmit(interval.index, newTime, newDistance)}
-                    onDelete={() => handleIntervalDeletion(interval.index)}
+                    onEditSubmit={(newTime: number, newDistance: number) => handleIntervalSubmit(interval.idx, newTime, newDistance)}
+                    onDelete={() => handleIntervalDeletion(interval.idx)}
                   />
                 ))}
 
@@ -215,9 +219,7 @@ export default function HomeScreen() {
                     },
                     {
                         text: "Save",
-                        onPress: () => {
-                          setWorkoutSaved(true)
-                        },
+                        onPress: () => handleSaveToProfile(),
                         style: 'default'
                     }
                   ],

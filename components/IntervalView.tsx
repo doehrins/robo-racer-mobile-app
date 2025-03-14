@@ -18,7 +18,7 @@ export function IntervalView({ interval, onEditSubmit, onDelete }: IntervalViewP
     <>
       {!showingFormView && 
         <View style={intervalViewStyles.intervalContainer}>
-          <Text>{interval.index}</Text>
+          <Text>{interval.idx}</Text>
           <Text>{interval.distance}</Text>
           <Text>{interval.time}</Text>
           <Pressable
@@ -36,7 +36,7 @@ export function IntervalView({ interval, onEditSubmit, onDelete }: IntervalViewP
 
       {showingFormView &&
         <IntervalFormView
-          index={interval.index}
+          index={interval.idx}
           defaultTime={interval.time}
           defaultDist={interval.distance}
           onSubmit={(newTime: number, newDistance: number) => {
