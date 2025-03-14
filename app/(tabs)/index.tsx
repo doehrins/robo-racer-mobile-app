@@ -6,6 +6,7 @@ import { ConnectionView } from '@/components/ConnectionView'
 import { Interval } from '@/globals/constants/types'
 import { garminBlue } from '@/globals/constants/Colors'
 import { useLocalSearchParams } from 'expo-router';
+import { useSQLiteContext } from 'expo-sqlite';
 
 
 var prevWorkoutID: number = -1
@@ -19,6 +20,8 @@ export default function HomeScreen() {
 
   const { id } = useLocalSearchParams()
   const workoutID: number = id ? Number(id) : -1 // convert to integer, search params are passed as strings
+
+  const db = useSQLiteContext();
 
   // If user is importing a saved workout to config screen
   if (workoutID != prevWorkoutID) {
@@ -70,8 +73,26 @@ export default function HomeScreen() {
     setWorkoutSaved(false)
   }
 
-  function handleSaveToProfile() {
+  const handleSaveToProfile = async()  => {
+    const result = await db.runAsync(`
+      INSERT INTO Workouts (name, description, totalDistance, totalTime, numIntervals, savedToProfile)
+      VALUES ('Default Name', 'Default Description', 0, 0, ${intervals.length}, 1);
+    `)
+    console.log(result)
 
+    var sqlQuery: string = "INSERT INTO Intervals (workoutID, idx, distance, time) VALUES ";
+    intervals.map((int) => (
+      sqlQuery += `(0, ${int.idx}, ${int.distance}, ${int.time}), `
+    ))
+
+    for (let i = 0; i < intervals.length - 1; i++) {
+      sqlQuery += `(0, ${intervals[i].idx}, ${intervals[i].distance}, ${intervals[i].time}), `
+    }
+    sqlQuery += `(0, ${intervals[intervals.length - 1].idx}, ${intervals[intervals.length - 1].distance}, ${intervals[intervals.length - 1].time});`
+
+    const result2 = await db.runAsync(sqlQuery);
+    console.log(result2)
+    
     setWorkoutSaved(true)
   }
 
