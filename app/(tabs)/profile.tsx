@@ -12,7 +12,7 @@ export default function TabTwoScreen() {
   const [workouts, setWorkouts] = useState<WorkoutDetails[]>([])
 
   const loadData = async() => {
-    const result = await db.getAllAsync<WorkoutDetails>('SELECT * FROM Workouts;');
+    const result = await db.getAllAsync<WorkoutDetails>('SELECT * FROM Workouts WHERE savedToProfile = true;');
     setWorkouts(result);
   }
 

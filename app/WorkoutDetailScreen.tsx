@@ -62,7 +62,7 @@ const WorkoutDetailScreen = () => {
                                 >
                                     <Text>{interval.idx}</Text>
                                     <Text>{interval.distance}</Text>
-                                    <Text>{interval.time}</Text>
+                                    <Text style={{marginLeft: 20}}>{interval.time}</Text>
                                 </View>
                             ))}
                         </View>
@@ -120,8 +120,11 @@ const styles = StyleSheet.create({
     },
     intervalContainer: {
         flexDirection: 'row',
-        gap: 10,
+        gap: 30,
         backgroundColor: 'white',
+        width: '70%',
+        padding: 10,
+        borderRadius: 10
     },
     button: {
         backgroundColor: garminBlue,
