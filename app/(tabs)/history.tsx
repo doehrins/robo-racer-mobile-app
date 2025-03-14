@@ -11,134 +11,113 @@ import FilterButton from '@/components/FilterButton';
 import DatePicker from '@/components/DatePicker';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import AppLayout from '@/components/AppLayout';
-import { garminBlue } from '@/constants/Colors';
+import { garminBlue } from '@/globals/constants/Colors';
+import { getDBConnection, getWorkoutEvents } from '@/app/database/SQLiteDatabase';
 
+// Define the state interface
 interface State {
   showPicker: boolean;
   selectedDate: Date | null;
+  historyData: EventItemData[];
 }
 
+// Define the interval data interface
 interface IntervalData {
   interval: string;
   speed: number;
   distance: number;
 }
 
+// Define the event item data interface
 interface EventItemData {
   id: string;
   date: string;
   startTime: string;
-  distance: string;
+  distance: number;
   duration: string;
   intervals: IntervalData[];
+  avgSpeed: number; // Change to number
+  maxSpeed: string; // Add maxSpeed
 }
 
+// Define the HistoryScreen component
 export default class HistoryScreen extends React.Component<{}, State> {
   state: State = {
     showPicker: false,
-    selectedDate: null
+    selectedDate: null,
+    historyData: []
   };
 
-  private historyData: EventItemData[] = [
-    {
-      id: '1',
-      date: 'March 7, 2025',
-      startTime: '10:34',
-      distance: '1000',
-      duration: '6 min',
-      intervals: [
-        { interval: 'Interval 1', speed: 2.5, distance: 400 },
-        { interval: 'Interval 2', speed: 3.0, distance: 600 },
-        { interval: 'Interval 3', speed: 4.0, distance: 200 },
-      ],
-    },
-    {
-      id: '2',
-      date: 'March 8, 2025',
-      startTime: '11:00',
-      distance: '1500',
-      duration: '8 min',
-      intervals: [
-        { interval: 'Interval 1', speed: 3.0, distance: 500 },
-        { interval: 'Interval 2', speed: 3.5, distance: 700 },
-        { interval: 'Interval 3', speed: 4.5, distance: 300 },
-      ],
-    },
-    {
-      id: '3',
-      date: 'March 9, 2025',
-      startTime: '09:15',
-      distance: '2000',
-      duration: '10 min',
-      intervals: [
-        { interval: 'Interval 1', speed: 3.5, distance: 600 },
-        { interval: 'Interval 2', speed: 4.0, distance: 800 },
-        { interval: 'Interval 3', speed: 4.5, distance: 600 },
-      ],
-    },
-    {
-      id: '4',
-      date: 'March 10, 2025',
-      startTime: '14:20',
-      distance: '1200',
-      duration: '7 min',
-      intervals: [
-        { interval: 'Interval 1', speed: 2.8, distance: 400 },
-        { interval: 'Interval 2', speed: 3.2, distance: 500 },
-        { interval: 'Interval 3', speed: 3.6, distance: 300 },
-      ],
-    },
-    {
-      id: '5',
-      date: 'March 11, 2025',
-      startTime: '16:45',
-      distance: '1800',
-      duration: '9 min',
-      intervals: [
-        { interval: 'Interval 1', speed: 3.2, distance: 600 },
-        { interval: 'Interval 2', speed: 3.8, distance: 800 },
-        { interval: 'Interval 3', speed: 4.2, distance: 400 },
-      ],
-    },
-  ];
+  // Fetch workout events from the database when the component mounts
+  async componentDidMount() {
+    const db = await getDBConnection();
+    const historyData = await getWorkoutEvents(db);
+    console.log('Fetched history data:', historyData); // Log fetched data
 
+    // Ensure intervals property is always an array and id is valid
+    const historyDataWithIntervals = historyData.map((item: EventItemData) => {
+      const intervals = item.intervals || [];
+      const avgSpeed = item.avgSpeed || 0; // Ensure avgSpeed is a number
+      const maxSpeed = intervals.length > 0 ? Math.max(...intervals.map(interval => interval.speed)).toFixed(2) : '0';
+      return {
+        ...item,
+        id: item.id || Math.random().toString(), // Ensure id is valid
+        intervals,
+        avgSpeed, // Add avgSpeed
+        maxSpeed, // Add maxSpeed
+      };
+    });
+    console.log('Processed history data:', historyDataWithIntervals); // Log processed data
+    this.setState({ historyData: historyDataWithIntervals });
+  }
+
+  // Format a date object to "MM/DD/YYYY" string
   private formatDate(date: Date): string {
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    const year = date.getFullYear();
+    return `${month}/${day}/${year}`;
+  }
+
+  // Filter the history data based on the selected date
+  private getFilteredData(): EventItemData[] {
+    const { selectedDate, historyData } = this.state;
+    if (!selectedDate) return historyData;
+    const desiredDateString = this.formatDate(selectedDate);
+    return historyData.filter(item => {
+      const itemDate = this.formatDate(new Date(item.date));
+      return itemDate === desiredDateString;
     });
   }
 
-  private getFilteredData(): EventItemData[] {
-    const { selectedDate } = this.state;
-    if (!selectedDate) return this.historyData;
-    const desiredDateString = this.formatDate(selectedDate);
-    return this.historyData.filter(item => item.date === desiredDateString);
-  }
-
+  // Calculate the maximum speed from the intervals
   private calculateMaxSpeed(intervals: IntervalData[]): number {
     return Math.max(...intervals.map(interval => interval.speed));
   }
 
+  // Calculate the average speed from the intervals
   private calculateAvgSpeed(intervals: IntervalData[]): number {
     const totalSpeed = intervals.reduce((sum, interval) => sum + interval.speed, 0);
     return totalSpeed / intervals.length;
   }
 
+  // Calculate the total distance from the event data
   private calculateTotalDistance(data: EventItemData[]): number {
-    return data.reduce((total, item) => total + parseFloat(item.distance), 0);
+    return data.reduce((total, item) => total + item.distance, 0);
   }
 
+  // Calculate the average speed for the day from the event data
   private calculateAvgSpeedForDay(data: EventItemData[]): string {
     const totalSpeed = data.reduce((total, item) => total + this.calculateAvgSpeed(item.intervals), 0);
     return (totalSpeed / data.length).toFixed(2);
   }
 
+  // Handle the press event for the calendar button
   private onPressCalendar = () => {
     this.setState({ showPicker: true });
   };
 
+  // Handle the date change event from the date picker
   private onChangeDate = (event: DateTimePickerEvent, date?: Date) => {
     if (event.type === 'dismissed') {
       this.setState({ showPicker: false });
@@ -152,6 +131,7 @@ export default class HistoryScreen extends React.Component<{}, State> {
     }
   };
 
+  // Clear the selected date
   private clearDateSelection = () => {
     this.setState({ selectedDate: null });
   };
@@ -201,13 +181,13 @@ export default class HistoryScreen extends React.Component<{}, State> {
                   date={item.date}
                   startTime={item.startTime}
                   distance={item.distance}
-                  avgSpeed={this.calculateAvgSpeed(item.intervals).toFixed(2)}
-                  maxSpeed={this.calculateMaxSpeed(item.intervals).toFixed(2)}
+                  avgSpeed={item.avgSpeed}
+                  maxSpeed={item.maxSpeed}
                   duration={item.duration}
                   intervals={item.intervals}
                 />
               )}
-              keyExtractor={(item) => item.id}
+              keyExtractor={(item) => item.id.toString()} // Ensure each item has a unique key
               contentContainerStyle={styles.listContent}
             />
           )}
