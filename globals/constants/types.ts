@@ -11,7 +11,7 @@ export type WorkoutDetails = {
     id: number;
     name: string;
     description: string;
-    totalDist: number; // distance in meters
+    totalDistance: number; // distance in meters
     totalTime: number; // duration in seconds
     numIntervals: number;
     savedToProfile: boolean;

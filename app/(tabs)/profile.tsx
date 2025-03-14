@@ -25,13 +25,16 @@ export default function TabTwoScreen() {
   );
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.heading}>Profile</Text>
+    <ScrollView style={{
+      flex: 1,
+      backgroundColor: 'white'
+    }}>
+      <View style={styles.container}>
+        <Text style={styles.heading}>Profile</Text>
 
-      <View style={styles.grayContainer}>
-        <Text style={styles.subHeading}>Saved Workouts</Text>
+        <View style={styles.grayContainer}>
+          <Text style={styles.subHeading}>Saved Workouts</Text>
 
-        <ScrollView>
           <View style={styles.workoutsContainer}>
             {workouts.map((w, idx) => (
               <WorkoutCardView
@@ -40,10 +43,9 @@ export default function TabTwoScreen() {
               />
             ))}
           </View>
-        </ScrollView>
+        </View>
       </View>
-      
-    </View>
+    </ScrollView>
   );
 }
 
@@ -52,6 +54,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     flex: 1,
     padding: 20,
+    paddingBottom: 100,
     gap: 20,
   },
   heading: {

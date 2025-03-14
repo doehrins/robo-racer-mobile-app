@@ -40,7 +40,7 @@ const WorkoutDetailScreen = () => {
                     <View style={styles.infoContainer}>
                         <Text style={styles.subheading}>Details:</Text>
                         <Text>Description: {workout.workoutDetails.description}</Text>
-                        <Text>Total Distance: {workout.workoutDetails.totalDist}m</Text>
+                        <Text>Total Distance: {workout.workoutDetails.totalDistance}m</Text>
                         <Text>Total Time: {workout.workoutDetails.totalTime} sec</Text>
                         <Text>Intervals: {workout.workoutDetails.numIntervals}</Text>
                     </View>

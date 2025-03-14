@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { View, Text, ScrollView, Image, Alert, StyleSheet, Pressable, Modal, TextInput } from 'react-native';
+import { View, Text, ScrollView, Image, Alert, StyleSheet, Pressable, Modal, TextInput, KeyboardAvoidingView } from 'react-native';
 import { IntervalView } from '@/components/IntervalView';
 import { IntervalFormView } from '@/components/IntervalFormView'
 import { ConnectionView } from '@/components/ConnectionView'
@@ -111,39 +111,42 @@ export default function HomeScreen() {
   }
 
   return (
-    <View style={styles.container}>
-      <Image
-        style={styles.logo}
-        source={require("../../assets/images/garmin-logo.png")}
-        resizeMode="contain" // scales image to fit within the given height and width without cropping
-        />
+    <ScrollView style={{
+      flex: 1,
+      backgroundColor: 'white'
+    }}>
+      <View style={styles.container}>
+        <Image
+          style={styles.logo}
+          source={require("../../assets/images/garmin-logo.png")}
+          resizeMode="contain" // scales image to fit within the given height and width without cropping
+          />
 
-      <ConnectionView onConnection={() => setBluetoothConnectionEstablished(true)}/>
+        <ConnectionView onConnection={() => setBluetoothConnectionEstablished(true)}/>
 
-      <View style={styles.configContainer}>
-        <View style={styles.workoutContainer}>
-          <View style={styles.titleContainer}>
-            <Text style={{
-              fontWeight: 'bold',
-              fontSize: 20,
-            }}>
-              Workout Configuration
-            </Text>
+        <View style={styles.configContainer}>
+          <View style={styles.workoutContainer}>
+            <View style={styles.titleContainer}>
+              <Text style={{
+                fontWeight: 'bold',
+                fontSize: 20,
+              }}>
+                Workout Configuration
+              </Text>
 
-            {workoutSaved &&
-              <Image
-                source={require('../../assets/images/circle-checkmark-icon.png')}
-                resizeMode='contain'
-                style={{
-                  height: 25,
-                  paddingRight: 10
-                }}
-              />
-            }
-          </View>
+              {workoutSaved &&
+                <Image
+                  source={require('../../assets/images/circle-checkmark-icon.png')}
+                  resizeMode='contain'
+                  style={{
+                    height: 25,
+                    paddingRight: 10
+                  }}
+                />
+              }
+            </View>
 
-          {!configurationSuccess &&
-            <ScrollView>
+            {!configurationSuccess &&
               <View style={styles.intervalsContainer}>
                 <View style={styles.headingsContainer}>
                   <Text>Int</Text>
@@ -187,113 +190,113 @@ export default function HomeScreen() {
                   <Text style={{color: garminBlue}}>Add Interval</Text>
                 </Pressable>  
               </View>
-            </ScrollView>
-          }
+            }
 
-          {configurationSuccess &&
-            <View style={styles.configSuccessContainer}>
-              <Image
-                source={require('../../assets/images/circle-checkmark-icon.png')}
-              />
+            {configurationSuccess &&
+              <View style={styles.configSuccessContainer}>
+                <Image
+                  source={require('../../assets/images/circle-checkmark-icon.png')}
+                />
 
-              <Text>Robot configured successfully!</Text>
-            </View>
-          }
-          
-        </View>
+                <Text>Robot configured successfully!</Text>
+              </View>
+            }
+            
+          </View>
 
-        <View style={styles.buttonsContainer}>
-          <Pressable
-            style={(!bluetoothConnectionEstablished || intervals.length == 0 || configurationSuccess) ? styles.disabledButton : styles.button}
-            disabled={configurationSuccess}
-            onPress={() => {
-              if (bluetoothConnectionEstablished && (intervals.length > 0)) {
-                Alert.alert(
-                  "Configure Robot?",
-                  "Ready to configure the robot with this workout?",
-                  [
-                    {
-                        text: "Cancel",
-                        style: 'cancel'
-                    },
-                    {
-                        text: "Configure",
-                        onPress: () => {
-                          setConfigurationSuccess(true)
-                        },
-                        style: 'default'
-                    }
-                  ],
-                  { cancelable: false }
-                )
-              }
-              else if (!bluetoothConnectionEstablished) {
-                Alert.alert("Establish connection to robot first!")
-              }
-              else {
-                // Connection established, but no intervals added to workout
-                Alert.alert("Add intervals to workout!")
-              }
-            }}
-            >
-            <Text style={styles.buttonText}>Configure Robot</Text>
-          </Pressable>
-
-          <Pressable
-            style={(intervals.length == 0 || configurationSuccess) ? styles.disabledButton : styles.button}
-            disabled={configurationSuccess}
-            onPress={() => {
-              if (intervals.length > 0) {
-                setModalVisible(true)
-              } else {
-                Alert.alert("Add intervals to workout!")
-              }
-            }}
-            >
-            <Text style={styles.buttonText}>Save to Profile</Text>
-          </Pressable>
-        </View>
-      </View>
-
-      <Modal
-        visible={modalVisible}
-      >
-        <View style={styles.modalContainer}>
-          <Text>Save Workout to Profile</Text>
-          <Text>Name:</Text>
-          <TextInput 
-            style={styles.textInput}
-            placeholder='name'
-            placeholderTextColor={'black'}
-            onChangeText={newName => setWorkoutName(newName)}
-          />
-          <Text>Description:</Text>
-          <TextInput 
-            style={styles.textInput}
-            placeholder='description'
-            placeholderTextColor={'black'}
-            onChangeText={newDescription => setWorkoutDescription(newDescription)}
-          />
-
-          <View style={styles.modalButtonsContainer}>
-            <Pressable 
-              style={styles.modalButton}
-              onPress={() => setModalVisible(false)}
-            >
-              <Text style={{color: 'red'}}>Cancel</Text>
+          <View style={styles.buttonsContainer}>
+            <Pressable
+              style={(!bluetoothConnectionEstablished || intervals.length == 0 || configurationSuccess) ? styles.disabledButton : styles.button}
+              disabled={configurationSuccess}
+              onPress={() => {
+                if (bluetoothConnectionEstablished && (intervals.length > 0)) {
+                  Alert.alert(
+                    "Configure Robot?",
+                    "Ready to configure the robot with this workout?",
+                    [
+                      {
+                          text: "Cancel",
+                          style: 'cancel'
+                      },
+                      {
+                          text: "Configure",
+                          onPress: () => {
+                            setConfigurationSuccess(true)
+                          },
+                          style: 'default'
+                      }
+                    ],
+                    { cancelable: false }
+                  )
+                }
+                else if (!bluetoothConnectionEstablished) {
+                  Alert.alert("Establish connection to robot first!")
+                }
+                else {
+                  // Connection established, but no intervals added to workout
+                  Alert.alert("Add intervals to workout!")
+                }
+              }}
+              >
+              <Text style={styles.buttonText}>Configure Robot</Text>
             </Pressable>
 
-            <Pressable 
-              style={styles.modalButton}
-              onPress={() => handleSaveToProfile()}
-            >
-              <Text style={{color: 'blue'}}>Save</Text>
+            <Pressable
+              style={(intervals.length == 0 || configurationSuccess || workoutSaved) ? styles.disabledButton : styles.button}
+              disabled={configurationSuccess || workoutSaved}
+              onPress={() => {
+                if (intervals.length > 0) {
+                  setModalVisible(true)
+                } else {
+                  Alert.alert("Add intervals to workout!")
+                }
+              }}
+              >
+              <Text style={styles.buttonText}>Save to Profile</Text>
             </Pressable>
           </View>
         </View>
-      </Modal>
 
-    </View>
+        <Modal
+          visible={modalVisible}
+        >
+          <View style={styles.modalContainer}>
+            <Text>Save Workout to Profile</Text>
+            <Text>Name:</Text>
+            <TextInput 
+              style={styles.textInput}
+              placeholder='name'
+              placeholderTextColor={'black'}
+              onChangeText={newName => setWorkoutName(newName)}
+            />
+            <Text>Description:</Text>
+            <TextInput 
+              style={styles.textInput}
+              placeholder='description'
+              placeholderTextColor={'black'}
+              onChangeText={newDescription => setWorkoutDescription(newDescription)}
+            />
+
+            <View style={styles.modalButtonsContainer}>
+              <Pressable 
+                style={styles.modalButton}
+                onPress={() => setModalVisible(false)}
+              >
+                <Text style={{color: 'red'}}>Cancel</Text>
+              </Pressable>
+
+              <Pressable 
+                style={styles.modalButton}
+                onPress={() => handleSaveToProfile()}
+              >
+                <Text style={{color: 'blue'}}>Save</Text>
+              </Pressable>
+            </View>
+          </View>
+        </Modal>
+
+      </View>
+    </ScrollView>
   );
 }
 
@@ -301,6 +304,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     padding: 20,
+    paddingBottom: 200,
     flex: 1, // Expands to fill all vertical space
     alignItems: 'center',
     gap: 20,

@@ -9,6 +9,7 @@ interface WorkoutProps {
 }
 
 export function WorkoutCardView({ workoutDetails }: WorkoutProps) {
+    console.log("workout details:", workoutDetails)
     return (
         <Link 
             href={{
@@ -26,7 +27,7 @@ export function WorkoutCardView({ workoutDetails }: WorkoutProps) {
                     }}>
                         {workoutDetails.name}
                     </Text>
-                    <Text>Total Distance: {workoutDetails.totalDist}m</Text>
+                    <Text>Total Distance: {workoutDetails.totalDistance}m</Text>
                     <Text>Total Time: {workoutDetails.totalTime} sec</Text>
                     <Text>Intervals: {workoutDetails.numIntervals}</Text>
                 </View>
