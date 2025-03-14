@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { View, Text, ScrollView, Image, Alert, StyleSheet, Pressable } from 'react-native';
+import { View, Text, ScrollView, Image, Alert, StyleSheet, Pressable, Modal, TextInput } from 'react-native';
 import { IntervalView } from '@/components/IntervalView';
 import { IntervalFormView } from '@/components/IntervalFormView'
 import { ConnectionView } from '@/components/ConnectionView'
@@ -17,6 +17,9 @@ export default function HomeScreen() {
   const [showingIntervalFormView, setShowingIntervalFormView] = useState(false)
   const [bluetoothConnectionEstablished, setBluetoothConnectionEstablished] = useState(false)
   const [configurationSuccess, setConfigurationSuccess] = useState(false)
+  const [modalVisible, setModalVisible] = useState(false)
+  const [workoutName, setWorkoutName] = useState("")
+  const [workoutDescription, setWorkoutDescription] = useState("")
 
   const { id } = useLocalSearchParams()
   const workoutID: number = id ? Number(id) : -1 // convert to integer, search params are passed as strings
@@ -79,9 +82,17 @@ export default function HomeScreen() {
   }
 
   const handleSaveToProfile = async()  => {
+    // Calculate total distance and time for workout
+    var totalDistance = 0
+    var totalTime = 0
+    intervals.forEach((interval) => {
+      totalDistance += interval.distance;
+      totalTime += interval.time;
+    })
+
     const result = await db.runAsync(`
       INSERT INTO Workouts (name, description, totalDistance, totalTime, numIntervals, savedToProfile)
-      VALUES ('Default Name', 'Default Description', 12, 34, ${intervals.length}, 1);
+      VALUES ('${workoutName}', '${workoutDescription}', ${totalDistance}, ${totalTime}, ${intervals.length}, 1);
     `)
     console.log('workout insert result:', result)
 
@@ -90,12 +101,13 @@ export default function HomeScreen() {
     for (let i = 0; i < intervals.length - 1; i++) {
       sqlQuery += `(${result.lastInsertRowId}, ${intervals[i].idx}, ${intervals[i].distance}, ${intervals[i].time}), `
     }
-    sqlQuery += `(0, ${intervals[intervals.length - 1].idx}, ${intervals[intervals.length - 1].distance}, ${intervals[intervals.length - 1].time});`
+    sqlQuery += `(${result.lastInsertRowId}, ${intervals[intervals.length - 1].idx}, ${intervals[intervals.length - 1].distance}, ${intervals[intervals.length - 1].time});`
 
     const result2 = await db.runAsync(sqlQuery);
     console.log(result2)
     
     setWorkoutSaved(true)
+    setModalVisible(false)
   }
 
   return (
@@ -232,22 +244,7 @@ export default function HomeScreen() {
             disabled={configurationSuccess}
             onPress={() => {
               if (intervals.length > 0) {
-                Alert.alert(
-                  "Save Workout?",
-                  "Are you sure you want to save this workout to your profile?",
-                  [
-                    {
-                        text: "Cancel",
-                        style: 'cancel'
-                    },
-                    {
-                        text: "Save",
-                        onPress: () => handleSaveToProfile(),
-                        style: 'default'
-                    }
-                  ],
-                  { cancelable: false }
-                )
+                setModalVisible(true)
               } else {
                 Alert.alert("Add intervals to workout!")
               }
@@ -257,6 +254,45 @@ export default function HomeScreen() {
           </Pressable>
         </View>
       </View>
+
+      <Modal
+        visible={modalVisible}
+      >
+        <View style={styles.modalContainer}>
+          <Text>Save Workout to Profile</Text>
+          <Text>Name:</Text>
+          <TextInput 
+            style={styles.textInput}
+            placeholder='name'
+            placeholderTextColor={'black'}
+            onChangeText={newName => setWorkoutName(newName)}
+          />
+          <Text>Description:</Text>
+          <TextInput 
+            style={styles.textInput}
+            placeholder='description'
+            placeholderTextColor={'black'}
+            onChangeText={newDescription => setWorkoutDescription(newDescription)}
+          />
+
+          <View style={styles.modalButtonsContainer}>
+            <Pressable 
+              style={styles.modalButton}
+              onPress={() => setModalVisible(false)}
+            >
+              <Text style={{color: 'red'}}>Cancel</Text>
+            </Pressable>
+
+            <Pressable 
+              style={styles.modalButton}
+              onPress={() => handleSaveToProfile()}
+            >
+              <Text style={{color: 'blue'}}>Save</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
+
     </View>
   );
 }
@@ -348,5 +384,30 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: 'white'
+  },
+  modalContainer: {
+    alignSelf: 'center',
+    width: 200,
+    marginTop: 250,
+    backgroundColor: garminBlue,
+    gap: 10,
+    padding: 10
+  },
+  modalButtonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around'
+  },
+  modalButton: {
+    backgroundColor: 'darkgray',
+    width: 60,
+    height: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 10,
+  },
+  textInput: {
+    borderWidth: 1,
+    backgroundColor: 'lightgray',
+    height: 30,
   }
 });
