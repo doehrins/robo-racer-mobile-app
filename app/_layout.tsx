@@ -91,7 +91,12 @@ export default function RootLayout() {
         <Stack>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="EventDetail" options={{ title: 'Event Detail' }} />
-          <Stack.Screen name="WorkoutDetailScreen"/>
+          <Stack.Screen name="WorkoutDetailScreen" options={{ 
+            title: "Workout Details",
+            headerBackTitle: "Profile",
+            headerStyle: { backgroundColor: 'darkgray' },
+            headerTitleStyle: { color: 'black' }
+          }}/>
           <Stack.Screen name="+not-found" />
         </Stack>
         <StatusBar style="auto" />

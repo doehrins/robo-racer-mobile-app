@@ -20,6 +20,7 @@ export default function HomeScreen() {
   const [modalVisible, setModalVisible] = useState(false)
   const [workoutName, setWorkoutName] = useState("")
   const [workoutDescription, setWorkoutDescription] = useState("")
+  const [promptNameField, setPromptNameField] = useState(false)
 
   const { id } = useLocalSearchParams()
   const workoutID: number = id ? Number(id) : -1 // convert to integer, search params are passed as strings
@@ -115,7 +116,7 @@ export default function HomeScreen() {
       flex: 1,
       backgroundColor: 'white'
     }}>
-      <View style={styles.container}>
+      <View style={modalVisible ? styles.blurredContainer : styles.container}>
         <Image
           style={styles.logo}
           source={require("../../assets/images/garmin-logo.png")}
@@ -259,17 +260,27 @@ export default function HomeScreen() {
 
         <Modal
           visible={modalVisible}
+          transparent={true}
+          animationType='fade'
         >
           <View style={styles.modalContainer}>
-            <Text>Save Workout to Profile</Text>
-            <Text>Name:</Text>
+            <Text style={{
+              fontWeight: 'bold',
+              fontSize: 20
+            }}>
+              Save Workout to Profile
+            </Text>
+            <Text>Workout Name:</Text>
             <TextInput 
-              style={styles.textInput}
+              style={promptNameField ? styles.textInputRequired : styles.textInput}
               placeholder='name'
-              placeholderTextColor={'black'}
-              onChangeText={newName => setWorkoutName(newName)}
+              placeholderTextColor={promptNameField ? 'red' : 'black'}
+              onChangeText={newName => {
+                setWorkoutName(newName)
+                setPromptNameField(false)
+              }}
             />
-            <Text>Description:</Text>
+            <Text>Workout Description:</Text>
             <TextInput 
               style={styles.textInput}
               placeholder='description'
@@ -287,7 +298,14 @@ export default function HomeScreen() {
 
               <Pressable 
                 style={styles.modalButton}
-                onPress={() => handleSaveToProfile()}
+                onPress={() => {
+                  if (workoutName == "") {
+                    setPromptNameField(true)
+                  } 
+                  else {
+                    handleSaveToProfile()
+                  }
+                }}
               >
                 <Text style={{color: 'blue'}}>Save</Text>
               </Pressable>
@@ -309,6 +327,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 20,
     backgroundColor: 'white',
+  },
+  blurredContainer: {
+    padding: 20,
+    paddingBottom: 200,
+    flex: 1, // Expands to fill all vertical space
+    alignItems: 'center',
+    gap: 20,
+    backgroundColor: 'white',
+    opacity: 0.5
   },
   logo: {
     width: 200,
@@ -390,28 +417,42 @@ const styles = StyleSheet.create({
     color: 'white'
   },
   modalContainer: {
+    justifyContent: 'center',
     alignSelf: 'center',
-    width: 200,
+    width: 250,
     marginTop: 250,
-    backgroundColor: garminBlue,
+    backgroundColor: 'darkgray',
     gap: 10,
-    padding: 10
+    padding: 10,
+    borderRadius: 20
   },
   modalButtonsContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-around'
+    justifyContent: 'space-around',
+    marginTop: 10
   },
   modalButton: {
-    backgroundColor: 'darkgray',
+    backgroundColor: 'lightgray',
     width: 60,
     height: 30,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 10,
+    borderWidth: 1
   },
   textInput: {
     borderWidth: 1,
     backgroundColor: 'lightgray',
     height: 30,
+    borderRadius: 10,
+    padding: 5
+  },
+  textInputRequired: {
+    borderWidth: 1,
+    backgroundColor: 'lightgray',
+    height: 30,
+    borderRadius: 10,
+    padding: 5,
+    borderColor: 'red'
   }
 });
