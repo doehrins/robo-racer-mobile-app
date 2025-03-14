@@ -2,38 +2,46 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
 import { RouteProp, useRoute, useNavigation } from '@react-navigation/native';
 import { LineChart } from 'react-native-chart-kit';
-import { garminBlue } from '@/constants/Colors';
+import { garminBlue } from '@/globals/constants/Colors';
 
+// Define the interval data interface
 type IntervalData = {
-  interval: string;
+  Index: number;
   speed: number;
-  distance: number;
+  Distance: number;
+  Time: number;
 };
 
+// Define the event item data interface
 type EventItemData = {
   id: string;
   date: string;
   timeRange: string;
-  distance: string;
-  avgSpeed: string;
+  distance: number;
+  avgSpeed: number;
   maxSpeed: string;
   duration: string;
   intervals: IntervalData[];
 };
 
+// Define the route prop type for the EventDetailScreen
 type EventDetailScreenRouteProp = RouteProp<{ params: { item: EventItemData } }, 'params'>;
 
+// Define the EventDetailScreen component
 const EventDetailScreen = () => {
-  const route = useRoute<EventDetailScreenRouteProp>();
-  const navigation = useNavigation();
-  const { item } = route.params;
-  const [selectedTab, setSelectedTab] = useState('speed');
+  const route = useRoute<EventDetailScreenRouteProp>(); // Get the route prop
+  const navigation = useNavigation(); // Get the navigation object
+  const { item } = route.params; // Extract the item from the route params
+  const [selectedTab, setSelectedTab] = useState('speed'); // State to manage the selected tab
 
+  // Set the header title and log the event item when the component mounts
   useEffect(() => {
-    navigation.setOptions({ headerTitle: 'Event: '+item.date });
+    navigation.setOptions({ headerTitle: `Event: ${item.date}` });
+    console.log('Event Item:', item); // Log the entire event item
   }, [navigation]);
 
-  if (!item || !item.intervals) {
+  // If no item or intervals are available, display an error message
+  if (!item || !item.intervals || item.intervals.length === 0) {
     return (
       <View style={styles.container}>
         <Text style={styles.errorText}>No data available</Text>
@@ -41,23 +49,47 @@ const EventDetailScreen = () => {
     );
   }
 
+  // Calculate total duration from intervals
+  const totalDuration = item.intervals.reduce((sum, interval) => sum + interval.Time, 0);
+
+  // Format total duration as HH:MM:SS
+  const formatDuration = (duration: number) => {
+    const hours = Math.floor(duration / 3600);
+    const minutes = Math.floor((duration % 3600) / 60);
+    const seconds = duration % 60;
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  };
+
+  // Prepare data for the speed chart
   const speedData = {
-    labels: item.intervals.map(interval => interval.interval),
+    labels: item.intervals.map((interval, index) => `Interval ${index + 1}`),
     datasets: [
       {
-        data: item.intervals.map(interval => interval.speed),
+        data: item.intervals.map(interval => {
+          const speed = isFinite(interval.speed) ? interval.speed : 0;
+          console.log(`Interval ${interval.Index} Speed:`, speed); // Log each speed value
+          return speed;
+        }),
       },
     ],
   };
 
+  // Prepare data for the distance chart
   const distanceData = {
-    labels: item.intervals.map(interval => interval.interval),
+    labels: item.intervals.map((interval, index) => `Interval ${index + 1}`),
     datasets: [
       {
-        data: item.intervals.map(interval => interval.distance),
+        data: item.intervals.map(interval => {
+          const distance = isFinite(interval.Distance) ? interval.Distance : 0;
+          console.log(`Interval ${interval.Index} Distance:`, distance); // Log each distance value
+          return distance;
+        }),
       },
     ],
   };
+
+  console.log('Speed Data:', speedData); // Log the speed data
+  console.log('Distance Data:', distanceData); // Log the distance data
 
   return (
     <ScrollView style={styles.container}>
@@ -67,7 +99,7 @@ const EventDetailScreen = () => {
       <View style={styles.statsContainer}>
         <View style={styles.statBox}>
           <Text style={styles.statLabel}>Avg Speed</Text>
-          <Text style={styles.statValue}>{item.avgSpeed} m/s</Text>
+          <Text style={styles.statValue}>{isFinite(item.avgSpeed) ? item.avgSpeed : 0} m/s</Text>
         </View>
         <View style={styles.statBox}>
           <Text style={styles.statLabel}>Max Speed</Text>
@@ -75,11 +107,11 @@ const EventDetailScreen = () => {
         </View>
         <View style={styles.statBox}>
           <Text style={styles.statLabel}>Distance</Text>
-          <Text style={styles.statValue}>{item.distance} m</Text>
+          <Text style={styles.statValue}>{isFinite(item.distance) ? item.distance : 0} m</Text>
         </View>
         <View style={styles.statBox}>
           <Text style={styles.statLabel}>Duration</Text>
-          <Text style={styles.statValue}>{item.duration}</Text>
+          <Text style={styles.statValue}>{formatDuration(totalDuration)}</Text>
         </View>
       </View>
       <View style={styles.tabContainer}>
@@ -155,9 +187,9 @@ const EventDetailScreen = () => {
         <Text style={styles.intervalTitle}>Interval Details</Text>
         {item.intervals.map((interval, index) => (
           <View key={index} style={styles.intervalRow}>
-            <Text style={styles.intervalLabel}>{interval.interval}</Text>
+            <Text style={styles.intervalLabel}>{`Interval ${index + 1}`}</Text>
             <Text style={styles.intervalValue}>
-              {selectedTab === 'speed' ? `${interval.speed} m/s` : `${interval.distance} m`}
+              {selectedTab === 'speed' ? `${isFinite(interval.speed) ? interval.speed : 0} m/s` : `${isFinite(interval.Distance) ? interval.Distance : 0} m`}
             </Text>
           </View>
         ))}
@@ -166,6 +198,7 @@ const EventDetailScreen = () => {
   );
 };
 
+// Define the styles for the component
 const styles = StyleSheet.create({
   container: {
     flex: 1,

@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import { StyleSheet, View, Dimensions, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
 import AppLayout from '@/components/AppLayout';
-import { garminBlue } from '@/constants/Colors';
+import { garminBlue } from '@/globals/constants/Colors';
 
+// Get the screen width for responsive design
 const screenWidth = Dimensions.get('window').width;
 
+// Tempory dummy data for the charts
 const data = {
   maxSpeed: {
     labels: ['1', '2', '3', '4', '5', '6'],
@@ -49,6 +51,7 @@ const data = {
   },
 };
 
+// Define the chart configuration
 const chartConfig = {
   backgroundColor: "#007cc1",
   backgroundGradientFrom: "#006ca8",
@@ -60,6 +63,7 @@ const chartConfig = {
   useShadowColorFromDataset: false,
 };
 
+// Define the graph configurations
 const graphs = {
   maxSpeed: { title: 'Max Speed (m/s)', data: data.maxSpeed, yAxisLabel: 'm/s' },
   averageSpeed: { title: 'Average Speed (m/s)', data: data.averageSpeed, yAxisLabel: 'm/s' },
@@ -67,25 +71,30 @@ const graphs = {
   averageDistance: { title: 'Average Distance (km)', data: data.averageDistance, yAxisLabel: 'km' },
 };
 
+// Define the type for the graph keys
 type GraphKey = keyof typeof graphs;
 
+// Define the MetricScreen component
 export default function MetricScreen() {
-  const [selectedMetric, setSelectedMetric] = useState<'average' | 'max'>('average');
-  const [selectedType, setSelectedType] = useState<'speed' | 'distance'>('speed');
+  const [selectedMetric, setSelectedMetric] = useState<'average' | 'max'>('average'); // State to manage the selected metric
+  const [selectedType, setSelectedType] = useState<'speed' | 'distance'>('speed'); // State to manage the selected type
 
+  // Function to get the graph key based on the selected metric and type
   const getGraphKey = (): GraphKey => {
     return `${selectedMetric}${selectedType.charAt(0).toUpperCase() + selectedType.slice(1)}` as GraphKey;
   };
 
-  const graphKey = getGraphKey();
-  const graph = graphs[graphKey];
+  const graphKey = getGraphKey(); // Get the current graph key
+  const graph = graphs[graphKey]; // Get the current graph configuration
 
+  // Define summary values for speed and distance
   const summarySpeed = selectedMetric === 'average' ? '3.8 m/s' : '4.0 m/s';
   const summaryDistance = selectedMetric === 'average' ? '5.1 km' : '6.0 km';
 
   return (
     <AppLayout>
       <ScrollView contentContainerStyle={styles.scrollViewContainer}>
+        {/* Summary Container */}
         <View style={styles.summaryContainer}>
           <View style={styles.summaryBox}>
             <Text style={styles.summaryLabel}>{selectedMetric === 'average' ? 'Avg Speed' : 'Max Speed'}</Text>
@@ -96,6 +105,7 @@ export default function MetricScreen() {
             <Text style={styles.summaryValue}>{summaryDistance}</Text>
           </View>
         </View>
+        {/* Button Container */}
         <View style={styles.buttonContainer}>
           <View style={styles.buttonRow}>
             <TouchableOpacity
@@ -126,6 +136,7 @@ export default function MetricScreen() {
             </TouchableOpacity>
           </View>
         </View>
+        {/* Chart Container */}
         <View style={styles.chartContainer}>
           <Text style={styles.chartTitle}>{graph.title}</Text>
           <View style={styles.chartWrapper}>
@@ -147,6 +158,7 @@ export default function MetricScreen() {
   );
 }
 
+// Define the styles for the component
 const styles = StyleSheet.create({
   scrollViewContainer: {
     alignItems: 'center',

@@ -3,42 +3,49 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { garminBlue } from '@/constants/Colors';
+import { garminBlue } from '@/globals/constants/Colors';
 
+// Define the navigation parameters for the stack
 type RootStackParamList = {
   EventDetailScreen: { item: EventItemData };
 };
 
+// Define the interval data interface
 interface IntervalData {
   interval: string;
   speed: number;
   distance: number;
 }
 
+// Define the event item data interface
 interface EventItemData {
   id: string;
   date: string;
   startTime: string;
-  distance: string;
-  avgSpeed: string;
+  distance: number;
+  avgSpeed: number;
   maxSpeed: string;
   duration: string;
   intervals: IntervalData[];
 }
 
+// Define the props for the EventItem component
 interface EventItemProps {
   id: string;
   date: string;
   startTime: string;
-  distance: string;
-  avgSpeed: string;
+  distance: number;
+  avgSpeed: number;
   maxSpeed: string;
   duration: string;
   intervals: IntervalData[];
 }
 
+// Define the EventItem component
 const EventItem: React.FC<EventItemProps> = ({ id, date, startTime, distance, avgSpeed, maxSpeed, duration, intervals }) => {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+
+  // Handle the press event to navigate to the EventDetailScreen
   const handlePress = () => {
     navigation.navigate('EventDetailScreen', { item: { id, date, startTime, distance, avgSpeed, maxSpeed, duration, intervals } });
   };
@@ -53,9 +60,9 @@ const EventItem: React.FC<EventItemProps> = ({ id, date, startTime, distance, av
           <MaterialIcons name="access-time" size={20} color={garminBlue} />
           <Text style={styles.text}>{startTime}</Text>
           <MaterialIcons name="directions-walk" size={20} color={garminBlue} />
-          <Text style={styles.text}>{distance}</Text>
+          <Text style={styles.text}>{distance} km</Text>
           <MaterialIcons name="speed" size={20} color={garminBlue} />
-          <Text style={styles.text}>{avgSpeed}</Text>
+          <Text style={styles.text}>{avgSpeed} m/s</Text>
         </View>
       </View>
       <MaterialIcons name="chevron-right" size={20} color={garminBlue} />
@@ -63,6 +70,7 @@ const EventItem: React.FC<EventItemProps> = ({ id, date, startTime, distance, av
   );
 };
 
+// Define the styles for the component
 const styles = StyleSheet.create({
   historyCard: {
     flexDirection: 'row',
