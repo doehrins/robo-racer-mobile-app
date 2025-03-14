@@ -1,13 +1,13 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { garminBlue } from '@/constants/Colors';
+import { garminBlue } from '@/globals/constants/Colors';
 
 interface FilterTagProps {
   date: string;
   onClear: () => void;
 }
-// tag that shows the date and a close icon to clear the filter
+// Tag that shows the date and a close icon to clear the filter
 const FilterTag: React.FC<FilterTagProps> = ({ date, onClear }) => {
   return (
     <TouchableOpacity style={styles.filterTag} onPress={onClear}>
