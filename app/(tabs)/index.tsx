@@ -76,17 +76,14 @@ export default function HomeScreen() {
   const handleSaveToProfile = async()  => {
     const result = await db.runAsync(`
       INSERT INTO Workouts (name, description, totalDistance, totalTime, numIntervals, savedToProfile)
-      VALUES ('Default Name', 'Default Description', 0, 0, ${intervals.length}, 1);
+      VALUES ('Default Name', 'Default Description', 12, 34, ${intervals.length}, 1);
     `)
-    console.log(result)
+    console.log('workout insert result:', result)
 
+    // Generate query for inserting intervals into database
     var sqlQuery: string = "INSERT INTO Intervals (workoutID, idx, distance, time) VALUES ";
-    intervals.map((int) => (
-      sqlQuery += `(0, ${int.idx}, ${int.distance}, ${int.time}), `
-    ))
-
     for (let i = 0; i < intervals.length - 1; i++) {
-      sqlQuery += `(0, ${intervals[i].idx}, ${intervals[i].distance}, ${intervals[i].time}), `
+      sqlQuery += `(${result.lastInsertRowId}, ${intervals[i].idx}, ${intervals[i].distance}, ${intervals[i].time}), `
     }
     sqlQuery += `(0, ${intervals[intervals.length - 1].idx}, ${intervals[intervals.length - 1].distance}, ${intervals[intervals.length - 1].time});`
 
