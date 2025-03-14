@@ -23,10 +23,15 @@ export default function HomeScreen() {
 
   const db = useSQLiteContext();
 
+  const fetchImportedWorkout = async() => {
+    const intervals = await db.getAllAsync<Interval>(`SELECT * FROM Intervals WHERE workoutID = ${workoutID};`);
+    setIntervals(intervals);
+  }
+
   // If user is importing a saved workout to config screen
   if (workoutID != prevWorkoutID) {
     prevWorkoutID = workoutID // update so component re-renders appropriately
-    // setIntervals(workouts[workoutID - 1].intervals)
+    fetchImportedWorkout();
     setWorkoutSaved(true)
   }
 
