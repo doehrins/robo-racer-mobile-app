@@ -36,7 +36,8 @@ export default function HomeScreen() {
   if (workoutID != prevWorkoutID) {
     prevWorkoutID = workoutID // update so component re-renders appropriately
     fetchImportedWorkout();
-    setWorkoutSaved(true)
+    setConfigurationSuccess(false);
+    setWorkoutSaved(true);
   }
 
   function handleIntervalSubmit(index: number, newTime: number, newDistance: number) {
