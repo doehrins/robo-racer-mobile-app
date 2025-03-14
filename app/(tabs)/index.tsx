@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { View, Text, ScrollView, Image, Alert, StyleSheet, Pressable } from 'react-native';
 import { IntervalView } from '@/components/IntervalView';
 import { IntervalFormView } from '@/components/IntervalFormView'
@@ -7,7 +7,7 @@ import { Interval } from '@/globals/constants/types'
 import { garminBlue } from '@/globals/constants/Colors'
 import workouts from '@/globals/workouts'
 import { useLocalSearchParams } from 'expo-router';
-
+import { initializeDatabase } from '../database/initializeDatabase';
 
 var prevWorkoutID: number = -1
 
@@ -20,6 +20,17 @@ export default function HomeScreen() {
 
   const { id } = useLocalSearchParams()
   const workoutID: number = id ? Number(id) : -1 // convert to integer, search params are passed as strings
+
+  useEffect(() => {
+    // Define async function to initialize the database
+    const initDB = async () => {
+      console.log('Initializing database');
+      await initializeDatabase(); // Function that initializes database
+      console.log('Database initialized');
+    };
+
+    initDB(); // Start initialization process
+  }, []); // Empty dependency array ensures this effect runs only once when the component mounts
 
   // If user is importing a saved workout to config screen
   if (workoutID != prevWorkoutID) {
