@@ -4,20 +4,25 @@ import { garminBlue } from '@/globals/constants/Colors';
 import { Link, useLocalSearchParams, useFocusEffect } from 'expo-router'
 import { useSQLiteContext } from 'expo-sqlite';
 import { useState, useCallback } from 'react'
+import { getDBConnection, getWorkoutByID, getIntervals } from './database/SQLiteDatabase';
 
 
 const WorkoutDetailScreen = () => {
     const { id } = useLocalSearchParams();
     const workoutID = Number(id)
 
-    const db = useSQLiteContext();
+    // const db = useSQLiteContext();
     const [workout, setWorkout] = useState<Workout>()
 
     const loadData = async() => {
-        const workoutDetails = await db.getFirstAsync<WorkoutDetails>(`SELECT * FROM Workouts WHERE id = ${workoutID};`);
-        const intervals = await db.getAllAsync<Interval>(`SELECT * FROM Intervals WHERE workoutID = ${workoutID};`);
+        const db = await getDBConnection();
+        const workoutDetails = await getWorkoutByID(db, workoutID);
+        const intervals = await getIntervals(db, workoutID);
+        // const workoutDetails = await db.getFirstAsync<WorkoutDetails>(`SELECT * FROM Workouts WHERE id = ${workoutID};`);
+        // const intervals = await db.getAllAsync<Interval>(`SELECT * FROM Intervals WHERE workoutID = ${workoutID};`);
+        console.log("workoutDetails:", workoutDetails)
         console.log(intervals)
-        setWorkout({workoutDetails: workoutDetails!, intervals: intervals})
+        // setWorkout({workoutDetails: workoutDetails!, intervals: intervals})
     }
 
     // Weird React magic... I think it prevents the loadData

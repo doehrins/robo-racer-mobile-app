@@ -90,6 +90,18 @@ export const getWorkouts = async (db: SQLite.SQLiteDatabase) => {
   return results[0].rows.raw(); // Return the raw data of the rows
 };
 
+// Function to fetch all workouts that are saved to profile from the Workout table
+export const getProfileWorkouts = async (db: SQLite.SQLiteDatabase) => {
+  const results = await db.executeSql(`SELECT * FROM Workout WHERE SavedToProfile = true;`);
+  return results[0].rows.raw(); // Return the raw data of the rows
+};
+
+// Function to fetch one specific workout from the Workout table
+export const getWorkoutByID = async (db: SQLite.SQLiteDatabase, id: number) => {
+  const results = await db.executeSql(`SELECT * FROM Workout WHERE ID = ${id};`);
+  return results[0].rows.raw(); // Return the raw data of the rows
+};
+
 // Function to fetch all intervals for a specific workout from the Interval table
 export const getIntervals = async (db: SQLite.SQLiteDatabase, workoutConfigurationID: number) => {
   const results = await db.executeSql(`SELECT * FROM Interval WHERE WorkoutConfigurationID = ?;`, [workoutConfigurationID]);
