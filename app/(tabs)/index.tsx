@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { View, Text, ScrollView, Image, Alert, StyleSheet, Pressable } from 'react-native';
+import { View, Text, ScrollView, Image, Alert, StyleSheet, Pressable, Modal, TextInput } from 'react-native';
 import { IntervalView } from '@/components/IntervalView';
 import { IntervalFormView } from '@/components/IntervalFormView'
 import { ConnectionView } from '@/components/ConnectionView'
@@ -7,8 +7,11 @@ import { Interval } from '@/globals/constants/types'
 import { garminBlue } from '@/globals/constants/Colors'
 import { useLocalSearchParams } from 'expo-router';
 import { initializeDatabase } from '../database/initializeDatabase';
+import { getDBConnection, getIntervals, insertInterval, insertWorkout } from '@/app/database/SQLiteDatabase'
+import SQLite from 'react-native-sqlite-storage'
 
 var prevWorkoutID: number = -1
+var db: SQLite.SQLiteDatabase
 
 export default function HomeScreen() {
   const [intervals, setIntervals] = useState<Interval[]>([])
@@ -30,15 +33,20 @@ export default function HomeScreen() {
       console.log('Initializing database');
       await initializeDatabase(); // Function that initializes database
       console.log('Database initialized');
+      
+      db = await getDBConnection();
     };
 
     initDB(); // Start initialization process
   }, []); // Empty dependency array ensures this effect runs only once when the component mounts
 
+
+
   // If user is importing a saved workout to config screen
   if (workoutID != prevWorkoutID) {
     prevWorkoutID = workoutID // update so component re-renders appropriately
-    fetchImportedWorkout();
+    const importedIntervals = getIntervals(db, workoutID);
+    console.log(importedIntervals)
     setConfigurationSuccess(false);
     setWorkoutSaved(true);
   }
@@ -95,21 +103,27 @@ export default function HomeScreen() {
       totalTime += interval.time;
     })
 
-    const result = await db.runAsync(`
-      INSERT INTO Workouts (name, description, totalDistance, totalTime, numIntervals, savedToProfile)
-      VALUES ('${workoutName}', '${workoutDescription}', ${totalDistance}, ${totalTime}, ${intervals.length}, 1);
-    `)
-    console.log('workout insert result:', result)
+    const res = insertWorkout(db, true, totalDistance, totalTime, intervals.length, workoutName, workoutDescription);
+    // const result = await db.runAsync(`
+    //   INSERT INTO Workouts (name, description, totalDistance, totalTime, numIntervals, savedToProfile)
+    //   VALUES ('${workoutName}', '${workoutDescription}', ${totalDistance}, ${totalTime}, ${intervals.length}, 1);
+    // `)
+    console.log('workout insert result:', res)
 
     // Generate query for inserting intervals into database
-    var sqlQuery: string = "INSERT INTO Intervals (workoutID, idx, distance, time) VALUES ";
-    for (let i = 0; i < intervals.length - 1; i++) {
-      sqlQuery += `(${result.lastInsertRowId}, ${intervals[i].idx}, ${intervals[i].distance}, ${intervals[i].time}), `
-    }
-    sqlQuery += `(${result.lastInsertRowId}, ${intervals[intervals.length - 1].idx}, ${intervals[intervals.length - 1].distance}, ${intervals[intervals.length - 1].time});`
+    // var sqlQuery: string = "INSERT INTO Intervals (workoutID, idx, distance, time) VALUES ";
+    // for (let i = 0; i < intervals.length - 1; i++) {
+    //   sqlQuery += `(${result.lastInsertRowId}, ${intervals[i].idx}, ${intervals[i].distance}, ${intervals[i].time}), `
+    // }
+    // sqlQuery += `(${result.lastInsertRowId}, ${intervals[intervals.length - 1].idx}, ${intervals[intervals.length - 1].distance}, ${intervals[intervals.length - 1].time});`
 
-    const result2 = await db.runAsync(sqlQuery);
-    console.log(result2)
+    // const result2 = await db.runAsync(sqlQuery);
+
+    intervals.forEach((interval) => {
+      insertInterval(db, workoutID, interval.idx, interval.time, interval.distance);
+    })
+
+    // console.log(result2)
     
     setWorkoutSaved(true)
     setModalVisible(false)
