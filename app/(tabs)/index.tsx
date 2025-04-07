@@ -5,7 +5,6 @@ import { IntervalFormView } from '@/components/IntervalFormView'
 import { ConnectionView } from '@/components/ConnectionView'
 import { Interval } from '@/globals/constants/types'
 import { garminBlue } from '@/globals/constants/Colors'
-import workouts from '@/globals/workouts'
 import { useLocalSearchParams } from 'expo-router';
 import { initializeDatabase } from '../database/initializeDatabase';
 
@@ -17,6 +16,10 @@ export default function HomeScreen() {
   const [showingIntervalFormView, setShowingIntervalFormView] = useState(false)
   const [bluetoothConnectionEstablished, setBluetoothConnectionEstablished] = useState(false)
   const [configurationSuccess, setConfigurationSuccess] = useState(false)
+  const [modalVisible, setModalVisible] = useState(false)
+  const [workoutName, setWorkoutName] = useState("")
+  const [workoutDescription, setWorkoutDescription] = useState("")
+  const [promptNameField, setPromptNameField] = useState(false)
 
   const { id } = useLocalSearchParams()
   const workoutID: number = id ? Number(id) : -1 // convert to integer, search params are passed as strings
@@ -35,14 +38,15 @@ export default function HomeScreen() {
   // If user is importing a saved workout to config screen
   if (workoutID != prevWorkoutID) {
     prevWorkoutID = workoutID // update so component re-renders appropriately
-    setIntervals(workouts[workoutID - 1].intervals)
-    setWorkoutSaved(true)
+    fetchImportedWorkout();
+    setConfigurationSuccess(false);
+    setWorkoutSaved(true);
   }
 
   function handleIntervalSubmit(index: number, newTime: number, newDistance: number) {
     // If adding a new interval
     if (index == intervals.length + 1) {
-      setIntervals([...intervals, {index: index, time: newTime, distance: newDistance}]);
+      setIntervals([...intervals, {workoutID: -1, idx: index, time: newTime, distance: newDistance}]);
       setShowingIntervalFormView(false);
     }
     // If editing an existing interval
@@ -50,7 +54,7 @@ export default function HomeScreen() {
       const newIntervals = intervals.map((interval, i) => {
         if (i == index - 1) {
           // Insert edited interval in proper location
-          return {index: index, time: newTime, distance: newDistance};
+          return {workoutID: -1, idx: index, time: newTime, distance: newDistance};
         }
         else {
           return interval;
@@ -64,14 +68,14 @@ export default function HomeScreen() {
   function handleIntervalDeletion(index: number) {
     // Remove the interval
     const newIntervals = intervals.filter(int => 
-      int.index != index
+      int.idx != index
     )
 
     // Update proceeding intervals' indicies
     const newIntervals2 = newIntervals.map(int => {
-      if (int.index > index) {
+      if (int.idx > index) {
         // Decrement the interval's index
-        return {index: int.index - 1, time: int.time, distance: int.distance};
+        return {workoutID: -1, idx: int.idx - 1, time: int.time, distance: int.distance};
       }
       else {
         return int;
@@ -82,40 +86,72 @@ export default function HomeScreen() {
     setWorkoutSaved(false)
   }
 
+  const handleSaveToProfile = async()  => {
+    // Calculate total distance and time for workout
+    var totalDistance = 0
+    var totalTime = 0
+    intervals.forEach((interval) => {
+      totalDistance += interval.distance;
+      totalTime += interval.time;
+    })
+
+    const result = await db.runAsync(`
+      INSERT INTO Workouts (name, description, totalDistance, totalTime, numIntervals, savedToProfile)
+      VALUES ('${workoutName}', '${workoutDescription}', ${totalDistance}, ${totalTime}, ${intervals.length}, 1);
+    `)
+    console.log('workout insert result:', result)
+
+    // Generate query for inserting intervals into database
+    var sqlQuery: string = "INSERT INTO Intervals (workoutID, idx, distance, time) VALUES ";
+    for (let i = 0; i < intervals.length - 1; i++) {
+      sqlQuery += `(${result.lastInsertRowId}, ${intervals[i].idx}, ${intervals[i].distance}, ${intervals[i].time}), `
+    }
+    sqlQuery += `(${result.lastInsertRowId}, ${intervals[intervals.length - 1].idx}, ${intervals[intervals.length - 1].distance}, ${intervals[intervals.length - 1].time});`
+
+    const result2 = await db.runAsync(sqlQuery);
+    console.log(result2)
+    
+    setWorkoutSaved(true)
+    setModalVisible(false)
+  }
+
   return (
-    <View style={styles.container}>
-      <Image
-        style={styles.logo}
-        source={require("../../assets/images/garmin-logo.png")}
-        resizeMode="contain" // scales image to fit within the given height and width without cropping
-        />
+    <ScrollView style={{
+      flex: 1,
+      backgroundColor: 'white'
+    }}>
+      <View style={modalVisible ? styles.blurredContainer : styles.container}>
+        <Image
+          style={styles.logo}
+          source={require("../../assets/images/garmin-logo.png")}
+          resizeMode="contain" // scales image to fit within the given height and width without cropping
+          />
 
-      <ConnectionView onConnection={() => setBluetoothConnectionEstablished(true)}/>
+        <ConnectionView onConnection={() => setBluetoothConnectionEstablished(true)}/>
 
-      <View style={styles.configContainer}>
-        <View style={styles.workoutContainer}>
-          <View style={styles.titleContainer}>
-            <Text style={{
-              fontWeight: 'bold',
-              fontSize: 20,
-            }}>
-              Workout Configuration
-            </Text>
+        <View style={styles.configContainer}>
+          <View style={styles.workoutContainer}>
+            <View style={styles.titleContainer}>
+              <Text style={{
+                fontWeight: 'bold',
+                fontSize: 20,
+              }}>
+                Workout Configuration
+              </Text>
 
-            {workoutSaved &&
-              <Image
-                source={require('../../assets/images/circle-checkmark-icon.png')}
-                resizeMode='contain'
-                style={{
-                  height: 25,
-                  paddingRight: 10
-                }}
-              />
-            }
-          </View>
+              {workoutSaved &&
+                <Image
+                  source={require('../../assets/images/circle-checkmark-icon.png')}
+                  resizeMode='contain'
+                  style={{
+                    height: 25,
+                    paddingRight: 10
+                  }}
+                />
+              }
+            </View>
 
-          {!configurationSuccess &&
-            <ScrollView>
+            {!configurationSuccess &&
               <View style={styles.intervalsContainer}>
                 <View style={styles.headingsContainer}>
                   <Text>Int</Text>
@@ -125,10 +161,10 @@ export default function HomeScreen() {
 
                 {intervals.map((interval) => (
                   <IntervalView
-                    key={interval.index} // necessary for React to manipulate the DOM
+                    key={interval.idx} // necessary for React to manipulate the DOM
                     interval={interval}
-                    onEditSubmit={(newTime: number, newDistance: number) => handleIntervalSubmit(interval.index, newTime, newDistance)}
-                    onDelete={() => handleIntervalDeletion(interval.index)}
+                    onEditSubmit={(newTime: number, newDistance: number) => handleIntervalSubmit(interval.idx, newTime, newDistance)}
+                    onDelete={() => handleIntervalDeletion(interval.idx)}
                   />
                 ))}
 
@@ -159,91 +195,130 @@ export default function HomeScreen() {
                   <Text style={{color: garminBlue}}>Add Interval</Text>
                 </Pressable>  
               </View>
-            </ScrollView>
-          }
+            }
 
-          {configurationSuccess &&
-            <View style={styles.configSuccessContainer}>
-              <Image
-                source={require('../../assets/images/circle-checkmark-icon.png')}
-              />
+            {configurationSuccess &&
+              <View style={styles.configSuccessContainer}>
+                <Image
+                  source={require('../../assets/images/circle-checkmark-icon.png')}
+                />
 
-              <Text>Robot configured successfully!</Text>
+                <Text>Robot configured successfully!</Text>
+              </View>
+            }
+            
+          </View>
+
+          <View style={styles.buttonsContainer}>
+            <Pressable
+              style={(!bluetoothConnectionEstablished || intervals.length == 0 || configurationSuccess) ? styles.disabledButton : styles.button}
+              disabled={configurationSuccess}
+              onPress={() => {
+                if (bluetoothConnectionEstablished && (intervals.length > 0)) {
+                  Alert.alert(
+                    "Configure Robot?",
+                    "Ready to configure the robot with this workout?",
+                    [
+                      {
+                          text: "Cancel",
+                          style: 'cancel'
+                      },
+                      {
+                          text: "Configure",
+                          onPress: () => {
+                            setConfigurationSuccess(true)
+                          },
+                          style: 'default'
+                      }
+                    ],
+                    { cancelable: false }
+                  )
+                }
+                else if (!bluetoothConnectionEstablished) {
+                  Alert.alert("Establish connection to robot first!")
+                }
+                else {
+                  // Connection established, but no intervals added to workout
+                  Alert.alert("Add intervals to workout!")
+                }
+              }}
+              >
+              <Text style={styles.buttonText}>Configure Robot</Text>
+            </Pressable>
+
+            <Pressable
+              style={(intervals.length == 0 || configurationSuccess || workoutSaved) ? styles.disabledButton : styles.button}
+              disabled={configurationSuccess || workoutSaved}
+              onPress={() => {
+                if (intervals.length > 0) {
+                  setModalVisible(true)
+                } else {
+                  Alert.alert("Add intervals to workout!")
+                }
+              }}
+              >
+              <Text style={styles.buttonText}>Save to Profile</Text>
+            </Pressable>
+          </View>
+        </View>
+
+        <Modal
+          visible={modalVisible}
+          transparent={true}
+          animationType='fade'
+        >
+          <View style={styles.modalContainer}>
+            <Text style={{
+              fontWeight: 'bold',
+              fontSize: 20
+            }}>
+              Save Workout to Profile
+            </Text>
+            <Text>Workout Name:</Text>
+            <TextInput 
+              style={promptNameField ? styles.textInputRequired : styles.textInput}
+              placeholder='name'
+              placeholderTextColor={promptNameField ? 'red' : 'black'}
+              onChangeText={newName => {
+                setWorkoutName(newName)
+                setPromptNameField(false)
+              }}
+            />
+            <Text>Workout Description:</Text>
+            <TextInput 
+              style={styles.textInput}
+              placeholder='description'
+              placeholderTextColor={'black'}
+              onChangeText={newDescription => setWorkoutDescription(newDescription)}
+            />
+
+            <View style={styles.modalButtonsContainer}>
+              <Pressable 
+                style={styles.modalButton}
+                onPress={() => setModalVisible(false)}
+              >
+                <Text style={{color: 'red'}}>Cancel</Text>
+              </Pressable>
+
+              <Pressable 
+                style={styles.modalButton}
+                onPress={() => {
+                  if (workoutName == "") {
+                    setPromptNameField(true)
+                  } 
+                  else {
+                    handleSaveToProfile()
+                  }
+                }}
+              >
+                <Text style={{color: 'blue'}}>Save</Text>
+              </Pressable>
             </View>
-          }
-          
-        </View>
+          </View>
+        </Modal>
 
-        <View style={styles.buttonsContainer}>
-          <Pressable
-            style={(!bluetoothConnectionEstablished || intervals.length == 0 || configurationSuccess) ? styles.disabledButton : styles.button}
-            disabled={configurationSuccess}
-            onPress={() => {
-              if (bluetoothConnectionEstablished && (intervals.length > 0)) {
-                Alert.alert(
-                  "Configure Robot?",
-                  "Ready to configure the robot with this workout?",
-                  [
-                    {
-                        text: "Cancel",
-                        style: 'cancel'
-                    },
-                    {
-                        text: "Configure",
-                        onPress: () => {
-                          setConfigurationSuccess(true)
-                        },
-                        style: 'default'
-                    }
-                  ],
-                  { cancelable: false }
-                )
-              }
-              else if (!bluetoothConnectionEstablished) {
-                Alert.alert("Establish connection to robot first!")
-              }
-              else {
-                // Connection established, but no intervals added to workout
-                Alert.alert("Add intervals to workout!")
-              }
-            }}
-            >
-            <Text style={styles.buttonText}>Configure Robot</Text>
-          </Pressable>
-
-          <Pressable
-            style={(intervals.length == 0 || configurationSuccess) ? styles.disabledButton : styles.button}
-            disabled={configurationSuccess}
-            onPress={() => {
-              if (intervals.length > 0) {
-                Alert.alert(
-                  "Save Workout?",
-                  "Are you sure you want to save this workout to your profile?",
-                  [
-                    {
-                        text: "Cancel",
-                        style: 'cancel'
-                    },
-                    {
-                        text: "Save",
-                        onPress: () => {
-                          setWorkoutSaved(true)
-                        },
-                        style: 'default'
-                    }
-                  ],
-                  { cancelable: false }
-                )
-              } else {
-                Alert.alert("Add intervals to workout!")
-              }
-            }}
-            >
-            <Text style={styles.buttonText}>Save to Profile</Text>
-          </Pressable>
-        </View>
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -251,10 +326,20 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     padding: 20,
+    paddingBottom: 200,
     flex: 1, // Expands to fill all vertical space
     alignItems: 'center',
     gap: 20,
     backgroundColor: 'white',
+  },
+  blurredContainer: {
+    padding: 20,
+    paddingBottom: 200,
+    flex: 1, // Expands to fill all vertical space
+    alignItems: 'center',
+    gap: 20,
+    backgroundColor: 'white',
+    opacity: 0.5
   },
   logo: {
     width: 200,
@@ -334,5 +419,44 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: 'white'
+  },
+  modalContainer: {
+    justifyContent: 'center',
+    alignSelf: 'center',
+    width: 250,
+    marginTop: 250,
+    backgroundColor: 'darkgray',
+    gap: 10,
+    padding: 10,
+    borderRadius: 20
+  },
+  modalButtonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginTop: 10
+  },
+  modalButton: {
+    backgroundColor: 'lightgray',
+    width: 60,
+    height: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 10,
+    borderWidth: 1
+  },
+  textInput: {
+    borderWidth: 1,
+    backgroundColor: 'lightgray',
+    height: 30,
+    borderRadius: 10,
+    padding: 5
+  },
+  textInputRequired: {
+    borderWidth: 1,
+    backgroundColor: 'lightgray',
+    height: 30,
+    borderRadius: 10,
+    padding: 5,
+    borderColor: 'red'
   }
 });
