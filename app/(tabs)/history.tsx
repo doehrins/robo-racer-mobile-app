@@ -3,60 +3,121 @@ import {
   View,
   Text,
   StyleSheet,
-  FlatList,
-  Image
+  FlatList
 } from 'react-native';
 import EventItem from '@/components/EventItem';
 import FilterTag from '@/components/FilterTag';
 import FilterButton from '@/components/FilterButton';
 import DatePicker from '@/components/DatePicker';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
+import AppLayout from '@/components/AppLayout';
+import { garminBlue } from '@/globals/constants/Colors';
+import { getDBConnection, getWorkoutEvents } from '@/app/database/SQLiteDatabase';
 
+// Define the state interface
 interface State {
   showPicker: boolean;
   selectedDate: Date | null;
+  historyData: EventItemData[];
 }
 
+// Define the interval data interface
+interface IntervalData {
+  interval: string;
+  speed: number;
+  distance: number;
+}
+
+// Define the event item data interface
 interface EventItemData {
   id: string;
   date: string;
-  timeRange: string;
-  distance: string;
-  avgSpeed: string;
+  startTime: string;
+  distance: number;
+  duration: string;
+  intervals: IntervalData[];
+  avgSpeed: number; // Change to number
+  maxSpeed: string; // Add maxSpeed
 }
 
+// Define the HistoryScreen component
 export default class HistoryScreen extends React.Component<{}, State> {
   state: State = {
     showPicker: false,
-    selectedDate: null
+    selectedDate: null,
+    historyData: []
   };
 
-  private historyData: EventItemData[] = [
-    { id: '1', date: '02/07/2025', timeRange: '10:34:12 - 10:40:09', distance: '1000 m', avgSpeed: '2.8 m/s' },
-    { id: '2', date: '02/08/2025', timeRange: '09:10:00 - 09:25:30', distance: '2000 m', avgSpeed: '3.1 m/s' },
-    { id: '3', date: '02/09/2025', timeRange: '14:00:00 - 14:10:00', distance: '1500 m', avgSpeed: '2.5 m/s' },
-    { id: '4', date: '02/09/2025', timeRange: '14:00:00 - 14:10:00', distance: '1500 m', avgSpeed: '2.5 m/s' },
-    { id: '5', date: '02/09/2025', timeRange: '14:00:00 - 14:10:00', distance: '1500 m', avgSpeed: '2.5 m/s' },
-  ];
+  // Fetch workout events from the database when the component mounts
+  async componentDidMount() {
+    const db = await getDBConnection();
+    const historyData = await getWorkoutEvents(db);
+    console.log('Fetched history data:', historyData); // Log fetched data
 
+    // Ensure intervals property is always an array and id is valid
+    const historyDataWithIntervals = historyData.map((item: EventItemData) => {
+      const intervals = item.intervals || [];
+      const avgSpeed = item.avgSpeed || 0; // Ensure avgSpeed is a number
+      const maxSpeed = intervals.length > 0 ? Math.max(...intervals.map(interval => interval.speed)).toFixed(2) : '0';
+      return {
+        ...item,
+        id: item.id || Math.random().toString(), // Ensure id is valid
+        intervals,
+        avgSpeed, // Add avgSpeed
+        maxSpeed, // Add maxSpeed
+      };
+    });
+    console.log('Processed history data:', historyDataWithIntervals); // Log processed data
+    this.setState({ historyData: historyDataWithIntervals });
+  }
+
+  // Format a date object to "MM/DD/YYYY" string
   private formatDate(date: Date): string {
-    const month = (date.getMonth() + 1).toString().padStart(2, '0'); 
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
     const day = date.getDate().toString().padStart(2, '0');
-    const year = date.getFullYear().toString();
+    const year = date.getFullYear();
     return `${month}/${day}/${year}`;
   }
-  // filter data by selected date
+
+  // Filter the history data based on the selected date
   private getFilteredData(): EventItemData[] {
-    const { selectedDate } = this.state;
-    if (!selectedDate) return this.historyData;
+    const { selectedDate, historyData } = this.state;
+    if (!selectedDate) return historyData;
     const desiredDateString = this.formatDate(selectedDate);
-    return this.historyData.filter(item => item.date === desiredDateString);
+    return historyData.filter(item => {
+      const itemDate = this.formatDate(new Date(item.date));
+      return itemDate === desiredDateString;
+    });
   }
 
+  // Calculate the maximum speed from the intervals
+  private calculateMaxSpeed(intervals: IntervalData[]): number {
+    return Math.max(...intervals.map(interval => interval.speed));
+  }
+
+  // Calculate the average speed from the intervals
+  private calculateAvgSpeed(intervals: IntervalData[]): number {
+    const totalSpeed = intervals.reduce((sum, interval) => sum + interval.speed, 0);
+    return totalSpeed / intervals.length;
+  }
+
+  // Calculate the total distance from the event data
+  private calculateTotalDistance(data: EventItemData[]): number {
+    return data.reduce((total, item) => total + item.distance, 0);
+  }
+
+  // Calculate the average speed for the day from the event data
+  private calculateAvgSpeedForDay(data: EventItemData[]): string {
+    const totalSpeed = data.reduce((total, item) => total + this.calculateAvgSpeed(item.intervals), 0);
+    return (totalSpeed / data.length).toFixed(2);
+  }
+
+  // Handle the press event for the calendar button
   private onPressCalendar = () => {
     this.setState({ showPicker: true });
   };
-  // handle date selection
+
+  // Handle the date change event from the date picker
   private onChangeDate = (event: DateTimePickerEvent, date?: Date) => {
     if (event.type === 'dismissed') {
       this.setState({ showPicker: false });
@@ -70,6 +131,7 @@ export default class HistoryScreen extends React.Component<{}, State> {
     }
   };
 
+  // Clear the selected date
   private clearDateSelection = () => {
     this.setState({ selectedDate: null });
   };
@@ -78,26 +140,36 @@ export default class HistoryScreen extends React.Component<{}, State> {
     const { showPicker, selectedDate } = this.state;
     const filteredData = this.getFilteredData();
     const selectedDateString = selectedDate ? this.formatDate(selectedDate) : '';
+    const totalDistance = this.calculateTotalDistance(filteredData);
+    const avgSpeed = this.calculateAvgSpeedForDay(filteredData);
 
     return (
-      <View style={styles.container}>
-        {/* Garmin logo */}
-        <Image
-          style={styles.logo}
-          source={require("../../assets/images/garmin-logo.png")}
-          resizeMode="contain"
-        />
-        {/* Big gray rectangle */}
+      <AppLayout>
         <View style={styles.grayArea}>
-          {/* tag-style button for clearing date filter */}
-          {selectedDate && (
-            <FilterTag date={selectedDateString} onClear={this.clearDateSelection} />
-          )}
-
-          <View style={styles.filterButtonContainer}>
-            <FilterButton onPress={this.onPressCalendar} />
+          <View style={styles.filterContainer}>
+            {selectedDate && (
+              <FilterTag date={selectedDateString} onClear={this.clearDateSelection} />
+            )}
+            <View style={styles.filterButtonContainer}>
+              <FilterButton onPress={this.onPressCalendar} />
+            </View>
           </View>
-          {/* No events message if nothing matches */}
+          <Text style={styles.sectionHeader}>Training Summary</Text>
+          <View style={styles.trainingSummary}>
+            <View style={styles.summaryBox}>
+              <Text style={styles.summaryValue}>{filteredData.length}</Text>
+              <Text style={styles.summaryLabel}>Sessions</Text>
+            </View>
+            <View style={styles.summaryBox}>
+              <Text style={styles.summaryValue}>{totalDistance} km</Text>
+              <Text style={styles.summaryLabel}>Distance</Text>
+            </View>
+            <View style={styles.summaryBox}>
+              <Text style={styles.summaryValue}>{avgSpeed} m/s</Text>
+              <Text style={styles.summaryLabel}>Avg Speed</Text>
+            </View>
+          </View>
+          <Text style={styles.sectionHeader}>Event History</Text>
           {selectedDate && filteredData.length === 0 ? (
             <Text style={styles.noEventsText}>No events for {selectedDateString}</Text>
           ) : (
@@ -107,39 +179,31 @@ export default class HistoryScreen extends React.Component<{}, State> {
                 <EventItem
                   id={item.id}
                   date={item.date}
-                  timeRange={item.timeRange}
+                  startTime={item.startTime}
                   distance={item.distance}
                   avgSpeed={item.avgSpeed}
+                  maxSpeed={item.maxSpeed}
+                  duration={item.duration}
+                  intervals={item.intervals}
                 />
               )}
-              keyExtractor={(item) => item.id}
+              keyExtractor={(item) => item.id.toString()} // Ensure each item has a unique key
               contentContainerStyle={styles.listContent}
             />
           )}
         </View>
-        {/* Native DateTimePicker */}
         {showPicker && (
           <DatePicker
             value={selectedDate || new Date()}
             onChange={this.onChangeDate}
           />
         )}
-      </View>
+      </AppLayout>
     );
   }
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FFF',
-    padding: 20,
-  },
-  logo: {
-    width: 120,
-    height: 40,
-    marginBottom: 10,
-  },
   grayArea: {
     flex: 1,
     backgroundColor: '#F0F0F0',
@@ -147,9 +211,40 @@ const styles = StyleSheet.create({
     padding: 10,
     position: 'relative',
   },
-  filterButtonContainer: {
-    alignItems: 'flex-end',
+  sectionHeader: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
     marginBottom: 10,
+  },
+  trainingSummary: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    paddingVertical: 10,
+    backgroundColor: '#FFF',
+    borderRadius: 8,
+    marginBottom: 10,
+  },
+  summaryBox: {
+    alignItems: 'center',
+  },
+  summaryValue: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: garminBlue,
+  },
+  summaryLabel: {
+    fontSize: 14,
+    color: '#555',
+  },
+  filterContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+  },
+  filterButtonContainer: {
+    marginLeft: 'auto',
   },
   listContent: {
     paddingBottom: 20,
