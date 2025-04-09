@@ -103,12 +103,13 @@ export default function HomeScreen() {
       totalTime += interval.time;
     })
 
-    const res = insertWorkout(db, true, totalDistance, totalTime, intervals.length, workoutName, workoutDescription);
+    // workoutID returned from inserting workout
+    const workoutID = await insertWorkout(db, true, totalDistance, totalTime, intervals.length, workoutName, workoutDescription);
     // const result = await db.runAsync(`
     //   INSERT INTO Workouts (name, description, totalDistance, totalTime, numIntervals, savedToProfile)
     //   VALUES ('${workoutName}', '${workoutDescription}', ${totalDistance}, ${totalTime}, ${intervals.length}, 1);
     // `)
-    console.log('workout insert result:', res)
+    console.log('workout insert result:', workoutID)
 
     // Generate query for inserting intervals into database
     // var sqlQuery: string = "INSERT INTO Intervals (workoutID, idx, distance, time) VALUES ";
@@ -120,6 +121,7 @@ export default function HomeScreen() {
     // const result2 = await db.runAsync(sqlQuery);
 
     intervals.forEach((interval) => {
+      console.log("workout id:", workoutID)
       insertInterval(db, workoutID, interval.idx, interval.time, interval.distance);
     })
 

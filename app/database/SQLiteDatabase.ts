@@ -1,4 +1,4 @@
-import { WorkoutDetails } from '@/globals/constants/types';
+import { WorkoutDetails, Interval } from '@/globals/constants/types';
 import SQLite from 'react-native-sqlite-storage';
 
 // Enable SQLite promise-based API
@@ -61,11 +61,12 @@ export const createTables = async (db: SQLite.SQLiteDatabase) => {
 };
 
 // Function to insert a new workout into the Workout table
-export const insertWorkout = async (db: SQLite.SQLiteDatabase, savedToProfile: boolean, totalDistance: number, totalTime: number, numIntervals: number, name?: string, description?: string) => {
+export const insertWorkout = async (db: SQLite.SQLiteDatabase, savedToProfile: boolean, totalDistance: number, totalTime: number, numIntervals: number, name?: string, description?: string): Promise<number> => {
   const result = await db.executeSql(
     `INSERT INTO Workout (SavedToProfile, Name, Description, TotalDistance, TotalTime, NumIntervals) VALUES (?, ?, ?, ?, ?, ?);`,
     [savedToProfile, name, description, totalDistance, totalTime, numIntervals]
   );
+  console.log("INSERTED", result[0].insertId)
   return result[0].insertId; // Return the ID of the inserted workout
 };
 
@@ -127,16 +128,44 @@ export const getProfileWorkouts = async (db: SQLite.SQLiteDatabase): Promise<Wor
   return transformedData; 
 };
 
-// Function to fetch one specific workout from the Workout table
-export const getWorkoutByID = async (db: SQLite.SQLiteDatabase, id: number) => {
-  const results = await db.executeSql(`SELECT * FROM Workout WHERE ID = ${id};`);
-  return results[0].rows.raw(); // Return the raw data of the rows
+// Function to fetch one specific workout from the Workout table and transform it to fit the WorkoutDetails type
+export const getWorkoutByID = async (db: SQLite.SQLiteDatabase, id: number): Promise<WorkoutDetails | null> => {
+  const results = await db.executeSql(`SELECT * FROM Workout WHERE ID = ?;`, [id]);
+  const rawData = results[0].rows.raw(); // Get the raw data of the rows
+
+  if (rawData.length === 0) {
+    // If no workout is found, return null
+    return null;
+  }
+
+  // Transform the raw data to fit the WorkoutDetails type
+  const workout: WorkoutDetails = {
+    id: rawData[0].ID,
+    name: rawData[0].Name || '',
+    description: rawData[0].Description || '',
+    totalDistance: rawData[0].TotalDistance || 0,
+    totalTime: rawData[0].TotalTime || 0,
+    numIntervals: rawData[0].NumIntervals || 0,
+    savedToProfile: !!rawData[0].SavedToProfile,
+  };
+
+  return workout;
 };
 
 // Function to fetch all intervals for a specific workout from the Interval table
-export const getIntervals = async (db: SQLite.SQLiteDatabase, workoutConfigurationID: number) => {
+export const getIntervals = async (db: SQLite.SQLiteDatabase, workoutConfigurationID: number): Promise<Interval[]> => {
   const results = await db.executeSql(`SELECT * FROM Interval WHERE WorkoutConfigurationID = ?;`, [workoutConfigurationID]);
-  return results[0].rows.raw(); // Return the raw data of the rows
+  const rawData = results[0].rows.raw(); 
+
+  // Transform the raw data to fit the Interval type
+  const transformedData: Interval[] = rawData.map((item) => ({
+    workoutID: item.WorkoutConfigurationID, 
+    idx: item.Index,
+    time: item.Time || 0, 
+    distance: item.Distance || 0, 
+  }));
+
+  return transformedData; 
 };
 
 // Function to fetch all workout events from the WorkoutEvent table
