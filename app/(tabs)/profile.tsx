@@ -4,16 +4,20 @@ import { WorkoutCardView } from '@/components/WorkoutCardView'
 import { useSQLiteContext } from 'expo-sqlite';
 import { useState, useCallback } from 'react'
 import { useFocusEffect } from 'expo-router';
-
+import SQLite from 'react-native-sqlite-storage'
+import { getDBConnection, getProfileWorkouts } from '../database/SQLiteDatabase';
 
 
 export default function TabTwoScreen() {
-  const db = useSQLiteContext();
+  // const db = useSQLiteContext();
   const [workouts, setWorkouts] = useState<WorkoutDetails[]>([])
 
   const loadData = async() => {
-    const result = await db.getAllAsync<WorkoutDetails>('SELECT * FROM Workouts WHERE savedToProfile = true;');
+    const db = await getDBConnection();
+    const result = await getProfileWorkouts(db);
+    // const result = await db.getAllAsync<WorkoutDetails>('SELECT * FROM Workouts WHERE savedToProfile = true;');
     setWorkouts(result);
+    console.log("profile workouts:", result)
   }
 
   // Weird React magic... I think it prevents the loadData
@@ -34,14 +38,16 @@ export default function TabTwoScreen() {
 
         <View style={styles.grayContainer}>
           <Text style={styles.subHeading}>Saved Workouts</Text>
-
+          
           <View style={styles.workoutsContainer}>
-            {workouts.map((w, idx) => (
-              <WorkoutCardView
-                key={idx}
-                workoutDetails={w}
-              />
-            ))}
+          {workouts.length > 0 ? (
+            workouts.map((w, idx) => (
+              <WorkoutCardView key={idx} workoutDetails={w} />
+            ))
+          ) : (
+            console.log("No workouts found"),
+            <Text>No workouts saved to profile</Text>
+          )}
           </View>
         </View>
       </View>
