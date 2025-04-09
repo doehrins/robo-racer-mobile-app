@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, Pressable } from 'react-native'
 import { WorkoutDetails } from '@/globals/constants/types'
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';``
 import { Link } from 'expo-router'
 
 

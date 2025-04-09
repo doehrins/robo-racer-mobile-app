@@ -16,8 +16,8 @@ export default function TabTwoScreen() {
     const db = await getDBConnection();
     const result = await getProfileWorkouts(db);
     // const result = await db.getAllAsync<WorkoutDetails>('SELECT * FROM Workouts WHERE savedToProfile = true;');
-    // setWorkouts(result);
-    console.log(result)
+    setWorkouts(result);
+    console.log("profile workouts:", result)
   }
 
   // Weird React magic... I think it prevents the loadData
@@ -38,14 +38,16 @@ export default function TabTwoScreen() {
 
         <View style={styles.grayContainer}>
           <Text style={styles.subHeading}>Saved Workouts</Text>
-
+          
           <View style={styles.workoutsContainer}>
-            {workouts.map((w, idx) => (
-              <WorkoutCardView
-                key={idx}
-                workoutDetails={w}
-              />
-            ))}
+          {workouts.length > 0 ? (
+            workouts.map((w, idx) => (
+              <WorkoutCardView key={idx} workoutDetails={w} />
+            ))
+          ) : (
+            console.log("No workouts found"),
+            <Text>No workouts saved to profile</Text>
+          )}
           </View>
         </View>
       </View>

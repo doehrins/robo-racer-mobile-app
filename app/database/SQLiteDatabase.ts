@@ -1,3 +1,4 @@
+import { WorkoutDetails } from '@/globals/constants/types';
 import SQLite from 'react-native-sqlite-storage';
 
 // Enable SQLite promise-based API
@@ -85,15 +86,45 @@ export const insertWorkoutEvent = async (db: SQLite.SQLiteDatabase, startDatetim
 };
 
 // Function to fetch all workouts from the Workout table
-export const getWorkouts = async (db: SQLite.SQLiteDatabase) => {
+export const getWorkouts = async (db: SQLite.SQLiteDatabase): Promise<WorkoutDetails[]> => {
   const results = await db.executeSql(`SELECT * FROM Workout;`);
-  return results[0].rows.raw(); // Return the raw data of the rows
+  const rawData = results[0].rows.raw(); // Get the raw data of the rows
+
+  // Transform the raw data to fit the WorkoutDetails type
+  // Set defaults if null
+  const transformedData: WorkoutDetails[] = rawData.map((item) => ({
+    id: item.ID, 
+    name: item.Name || '', 
+    description: item.Description || '', 
+    totalDistance: item.TotalDistance || 0, 
+    totalTime: item.TotalTime || 0, 
+    numIntervals: item.NumIntervals || 0, 
+    savedToProfile: !!item.SavedToProfile,
+  }));
+
+  return transformedData; 
 };
 
 // Function to fetch all workouts that are saved to profile from the Workout table
-export const getProfileWorkouts = async (db: SQLite.SQLiteDatabase) => {
+export const getProfileWorkouts = async (db: SQLite.SQLiteDatabase): Promise<WorkoutDetails[]> => {
   const results = await db.executeSql(`SELECT * FROM Workout WHERE SavedToProfile = true;`);
-  return results[0].rows.raw(); // Return the raw data of the rows
+  const rawData = results[0].rows.raw(); // Get the raw data of the rows
+
+  // Transform the raw data to fit the WorkoutDetails type
+  // Set defaults if null
+  const transformedData: WorkoutDetails[] = rawData.map((item) => ({
+    id: item.ID, 
+    name: item.Name || '', 
+    description: item.Description || '', 
+    totalDistance: item.TotalDistance || 0, 
+    totalTime: item.TotalTime || 0, 
+    numIntervals: item.NumIntervals || 0, 
+    savedToProfile: !!item.SavedToProfile,
+  }));
+  console.log("results:", results)
+  console.log("results[0].rows:", results[0].rows)
+
+  return transformedData; 
 };
 
 // Function to fetch one specific workout from the Workout table
