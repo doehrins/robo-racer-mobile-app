@@ -1,57 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Dimensions, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
 import AppLayout from '@/components/AppLayout';
 import { garminBlue } from '@/globals/constants/Colors';
+import { getDBConnection, getWorkouts } from '@/app/database/SQLiteDatabase';
 
 // Get the screen width for responsive design
 const screenWidth = Dimensions.get('window').width;
 
-// Tempory dummy data for the charts
-const data = {
-  maxSpeed: {
-    labels: ['1', '2', '3', '4', '5', '6'],
-    datasets: [
-      {
-        data: [6.0, 6.5, 5.5, 8.0, 8.5, 9.0],
-        color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-        strokeWidth: 2,
-      },
-    ],
-  },
-  averageSpeed: {
-    labels: ['1', '2', '3', '4', '5', '6'],
-    datasets: [
-      {
-        data: [4.0, 5.0, 3.5, 6.0, 6.5, 7.8],
-        color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-        strokeWidth: 2,
-      },
-    ],
-  },
-  maxDistance: {
-    labels: ['1', '2', '3', '4', '5', '6'],
-    datasets: [
-      {
-        data: [3, 3, 4, 5, 5, 6],
-        color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-        strokeWidth: 2,
-      },
-    ],
-  },
-  averageDistance: {
-    labels: ['1', '2', '3', '4', '5', '6'],
-    datasets: [
-      {
-        data: [1, 2, 2, 3, 3, 4],
-        color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-        strokeWidth: 2,
-      },
-    ],
-  },
-};
-
-// Define the chart configuration
 const chartConfig = {
   backgroundColor: "#007cc1",
   backgroundGradientFrom: "#006ca8",
@@ -63,33 +19,76 @@ const chartConfig = {
   useShadowColorFromDataset: false,
 };
 
-// Define the graph configurations
-const graphs = {
-  maxSpeed: { title: 'Max Speed (m/s)', data: data.maxSpeed, yAxisLabel: 'm/s' },
-  averageSpeed: { title: 'Average Speed (m/s)', data: data.averageSpeed, yAxisLabel: 'm/s' },
-  maxDistance: { title: 'Max Distance (km)', data: data.maxDistance, yAxisLabel: 'km' },
-  averageDistance: { title: 'Average Distance (km)', data: data.averageDistance, yAxisLabel: 'km' },
-};
-
-// Define the type for the graph keys
-type GraphKey = keyof typeof graphs;
-
-// Define the MetricScreen component
 export default function MetricScreen() {
-  const [selectedMetric, setSelectedMetric] = useState<'average' | 'max'>('average'); // State to manage the selected metric
-  const [selectedType, setSelectedType] = useState<'speed' | 'distance'>('speed'); // State to manage the selected type
+  const [selectedMetric, setSelectedMetric] = useState<'average' | 'max'>('average'); // state to manage selected metric
+  const [selectedType, setSelectedType] = useState<'speed' | 'distance'>('speed'); // state to manage selected type
+  const [workoutData, setWorkoutData] = useState<any>(null); // State to store workout data
 
-  // Function to get the graph key based on the selected metric and type
-  const getGraphKey = (): GraphKey => {
-    return `${selectedMetric}${selectedType.charAt(0).toUpperCase() + selectedType.slice(1)}` as GraphKey;
+  // Fetch data from the database
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const db = await getDBConnection();
+        const workouts = await getWorkouts(db); // get workouts from the database
+        console.log('Fetched workouts:', workouts);
+
+        // Transform the data for charts
+        const maxSpeedData = workouts.map((workout) => workout.totalDistance / workout.totalTime);
+        const averageSpeedData = workouts.map((workout) => workout.totalDistance / workout.numIntervals); 
+        const maxDistanceData = workouts.map((workout) => workout.totalDistance);
+        const averageDistanceData = workouts.map((workout) => workout.totalDistance / workout.numIntervals);
+
+        setWorkoutData({
+          maxSpeed: {
+            labels: workouts.map((_, index) => `${index + 1}`),
+            datasets: [{ data: maxSpeedData }],
+          },
+          averageSpeed: {
+            labels: workouts.map((_, index) => `${index + 1}`),
+            datasets: [{ data: averageSpeedData }],
+          },
+          maxDistance: {
+            labels: workouts.map((_, index) => `${index + 1}`),
+            datasets: [{ data: maxDistanceData }],
+          },
+          averageDistance: {
+            labels: workouts.map((_, index) => `${index + 1}`),
+            datasets: [{ data: averageDistanceData }],
+          },
+        });
+      } catch (error) {
+        console.error('Error fetching workout data:', error);
+      }
+    };
+
+    loadData();
+  }, []);
+
+  // Get the current graph key
+  const getGraphKey = (): keyof typeof workoutData => {
+    return `${selectedMetric}${selectedType.charAt(0).toUpperCase() + selectedType.slice(1)}` as keyof typeof workoutData;
   };
 
-  const graphKey = getGraphKey(); // Get the current graph key
-  const graph = graphs[graphKey]; // Get the current graph configuration
+  // Give feedback that data isn't loaded yet
+  if (!workoutData) {
+    return (
+      <AppLayout>
+        <Text>Loading data...</Text>
+      </AppLayout>
+    );
+  }
 
-  // Define summary values for speed and distance
-  const summarySpeed = selectedMetric === 'average' ? '3.8 m/s' : '4.0 m/s';
-  const summaryDistance = selectedMetric === 'average' ? '5.1 km' : '6.0 km';
+  const graphKey = getGraphKey(); 
+  const graph = workoutData[graphKey]; // get the current graph configuration
+
+  // Calculate summary values for speed and distance
+  const summarySpeed = selectedMetric === 'average'
+    ? (workoutData.averageSpeed.datasets[0].data.reduce((sum: number, value: number) => sum + value, 0) / workoutData.averageSpeed.datasets[0].data.length).toFixed(2) + ' m/s'
+    : Math.max(...workoutData.maxSpeed.datasets[0].data).toFixed(2) + ' m/s';
+
+  const summaryDistance = selectedMetric === 'average'
+    ? (workoutData.averageDistance.datasets[0].data.reduce((sum: number, value: number) => sum + value, 0) / workoutData.averageDistance.datasets[0].data.length).toFixed(2) + ' km'
+    : Math.max(...workoutData.maxDistance.datasets[0].data).toFixed(2) + ' km';
 
   return (
     <AppLayout>
@@ -141,16 +140,16 @@ export default function MetricScreen() {
           <Text style={styles.chartTitle}>{graph.title}</Text>
           <View style={styles.chartWrapper}>
             <LineChart
-              data={graph.data}
-              width={screenWidth - 80} // Adjusted width to fit better
-              height={200} // Adjusted height to fit better
+              data={graph}
+              width={screenWidth - 80} 
+              height={200} 
               chartConfig={chartConfig}
               bezier
               style={styles.chart}
               fromZero
             />
             <Text style={styles.yAxisLabel}>{graph.yAxisLabel}</Text>
-            <Text style={styles.xAxisLabel}>Week</Text>
+            <Text style={styles.xAxisLabel}>Workout</Text>
           </View>
         </View>
       </ScrollView>
@@ -158,7 +157,6 @@ export default function MetricScreen() {
   );
 }
 
-// Define the styles for the component
 const styles = StyleSheet.create({
   scrollViewContainer: {
     alignItems: 'center',
