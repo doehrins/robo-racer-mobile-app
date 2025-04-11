@@ -14,21 +14,18 @@ import AppLayout from '@/components/AppLayout';
 import { garminBlue } from '@/globals/constants/Colors';
 import { getDBConnection, getWorkoutEvents } from '@/app/database/SQLiteDatabase';
 
-// Define the state interface
 interface State {
   showPicker: boolean;
   selectedDate: Date | null;
   historyData: EventItemData[];
 }
 
-// Define the interval data interface
 interface IntervalData {
   interval: string;
   speed: number;
   distance: number;
 }
 
-// Define the event item data interface
 interface EventItemData {
   id: string;
   date: string;
@@ -36,11 +33,10 @@ interface EventItemData {
   distance: number;
   duration: string;
   intervals: IntervalData[];
-  avgSpeed: number; // Change to number
-  maxSpeed: string; // Add maxSpeed
+  avgSpeed: number;  
+  maxSpeed: string; 
 }
 
-// Define the HistoryScreen component
 export default class HistoryScreen extends React.Component<{}, State> {
   state: State = {
     showPicker: false,
@@ -52,7 +48,7 @@ export default class HistoryScreen extends React.Component<{}, State> {
   async componentDidMount() {
     const db = await getDBConnection();
     const historyData = await getWorkoutEvents(db);
-    console.log('Fetched history data:', historyData); // Log fetched data
+    console.log('Fetched history data:', historyData);  
 
     // Ensure intervals property is always an array and id is valid
     const historyDataWithIntervals = historyData.map((item: EventItemData) => {
@@ -63,8 +59,8 @@ export default class HistoryScreen extends React.Component<{}, State> {
         ...item,
         id: item.id || Math.random().toString(), // Ensure id is valid
         intervals,
-        avgSpeed, // Add avgSpeed
-        maxSpeed, // Add maxSpeed
+        avgSpeed, 
+        maxSpeed,      
       };
     });
     console.log('Processed history data:', historyDataWithIntervals); // Log processed data
