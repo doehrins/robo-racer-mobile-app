@@ -41,4 +41,10 @@ app-example
 # dev builds
 devices.json
 
-anroid/
+android/
+
+# VS Code
+.vscode/
+
+# Android Studio
+.idea/
