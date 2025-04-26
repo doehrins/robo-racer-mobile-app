@@ -25,11 +25,6 @@ export default function HomeScreen() {
   const [promptNameField, setPromptNameField] = useState(false)
   const [workoutID, setWorkoutID] = useState(-1)
 
-  const { id } = useLocalSearchParams()
-
-  if (id) {
-    setWorkoutID(Number(id)); // convert to integer, search params are passed as strings
-  }
 
   useEffect(() => {
     // Define async function to initialize the database
@@ -45,11 +40,22 @@ export default function HomeScreen() {
   }, []); // Empty dependency array ensures this effect runs only once when the component mounts
 
 
+  const {id} = useLocalSearchParams()
+  const id_num: number = id ? Number(id) : -1 // convert to integer, search params are passed as strings
+
+  console.log("loading config screen, workoutID:", id);
+
+  const loadIntervals = async() => {
+    const importedIntervals = await getIntervals(db, id_num);
+    console.log("imported intervals:", importedIntervals)
+    setIntervals(importedIntervals);
+  }
+
   // If user is importing a saved workout to config screen
-  if (workoutID != prevWorkoutID) {
-    prevWorkoutID = workoutID // update so component re-renders appropriately
-    const importedIntervals = getIntervals(db, workoutID);
-    console.log(importedIntervals)
+  if (id_num != prevWorkoutID) {
+    prevWorkoutID = id_num // update so component re-renders appropriately
+    loadIntervals();
+    setWorkoutID(id_num);
     setConfigurationSuccess(false);
     setWorkoutSaved(true);
   }

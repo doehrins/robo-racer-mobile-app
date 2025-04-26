@@ -4,7 +4,6 @@ import { WorkoutCardView } from '@/components/WorkoutCardView'
 import { useSQLiteContext } from 'expo-sqlite';
 import { useState, useCallback } from 'react'
 import { useFocusEffect } from 'expo-router';
-import SQLite from 'react-native-sqlite-storage'
 import { getDBConnection, getProfileWorkouts } from '../database/SQLiteDatabase';
 
 
@@ -15,7 +14,6 @@ export default function TabTwoScreen() {
   const loadData = async() => {
     const db = await getDBConnection();
     const result = await getProfileWorkouts(db);
-    // const result = await db.getAllAsync<WorkoutDetails>('SELECT * FROM Workouts WHERE savedToProfile = true;');
     setWorkouts(result);
     console.log("profile workouts:", result)
   }
