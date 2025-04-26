@@ -48,6 +48,8 @@ export default function HomeScreen() {
   // If user is importing a saved workout to config screen
   if (id_num != prevWorkoutID) {
     prevWorkoutID = id_num // update so component re-renders appropriately
+
+    // this needs to await so it actually gets the intervals!
     const importedIntervals = getIntervals(db, id_num);
     console.log("imported intervals:", importedIntervals)
     setWorkoutID(id_num);
