@@ -97,7 +97,7 @@ export default function HomeScreen() {
     setWorkoutSaved(false)
   }
 
-  const handleSaveToProfile = async() => {
+  const buildWorkout = async(saveToProfile: boolean) => {
     // Calculate total distance and time for workout
     var totalDistance = 0
     var totalTime = 0
@@ -107,12 +107,17 @@ export default function HomeScreen() {
     })
 
     // workoutID returned from inserting workout
-    const id = await insertWorkout(db, true, totalDistance, totalTime, intervals.length, workoutName, workoutDescription);
+    const id = await insertWorkout(db, saveToProfile, totalDistance, totalTime, intervals.length, workoutName, workoutDescription);
 
     intervals.forEach((interval) => {
-      console.log("workout id:", id)
       insertInterval(db, id, interval.idx, interval.time, interval.distance);
     })
+
+    return id;
+  }
+
+  const handleSaveToProfile = async() => {
+    const id = await buildWorkout(true);
     
     setWorkoutSaved(true)
     setModalVisible(false)
@@ -120,11 +125,14 @@ export default function HomeScreen() {
   }
 
   const handleConfigRobot = async() => {
-    const curDT = "2025-04-26T08:00:00Z"; // hard code for now
+    const curDT = new Date().toISOString();
     if (workoutSaved) {
       // Workout already saved to profile
-      console.log("handleConfigRobot workoutID:", workoutID)
-      await insertWorkoutEvent(db, curDT, workoutID);
+      insertWorkoutEvent(db, curDT, workoutID);
+    }
+    else {
+      const id = await buildWorkout(false);
+      insertWorkoutEvent(db, curDT, id);
     }
 
     setConfigurationSuccess(true);
