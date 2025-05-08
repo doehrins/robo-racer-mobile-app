@@ -1,17 +1,14 @@
 import { View, Text, StyleSheet, ScrollView, Pressable, Alert } from 'react-native';
 import { WorkoutDetails, Workout, Interval } from '@/globals/constants/types'
 import { garminBlue } from '@/globals/constants/Colors';
-import { Link, useLocalSearchParams, useFocusEffect } from 'expo-router'
-import { useSQLiteContext } from 'expo-sqlite';
+import { Link, useLocalSearchParams, useFocusEffect, router } from 'expo-router'
 import { useState, useCallback } from 'react'
-import { getDBConnection, getWorkoutByID, getIntervals } from './database/SQLiteDatabase';
+import { getDBConnection, getWorkoutByID, getIntervals, removeWorkoutFromProfile } from './database/SQLiteDatabase';
 
 
 const WorkoutDetailScreen = () => {
     const { id } = useLocalSearchParams();
     const workoutID = Number(id)
-    console.log("workoutDetailScreen workoutID:", workoutID)
-
     const [workout, setWorkout] = useState<Workout>()
 
     const loadData = async() => {
@@ -30,6 +27,12 @@ const WorkoutDetailScreen = () => {
             loadData();
         }, [])
     );
+
+    const handleDeleteWorkout = async() => {
+        const db = await getDBConnection();
+        await removeWorkoutFromProfile(db, workoutID);
+        router.dismiss();
+    }
 
     if (!workout) {
         return <Text>Error</Text> // TODO: make this a proper redirect
@@ -83,6 +86,32 @@ const WorkoutDetailScreen = () => {
                             <Text style={styles.buttonText}>Configure Robot</Text>
                         </Pressable>
                     </Link>
+
+                    <Pressable 
+                        style={styles.button}
+                        onPress={() => {
+                            Alert.alert(
+                                "Delete Workout?",
+                                "Are you sure you want to delete this workout? This action cannot be undone.",
+                                [
+                                    {
+                                        text: "Cancel",
+                                        style: 'cancel'
+                                    },
+                                    {
+                                        text: "Delete",
+                                        onPress: () => {
+                                            handleDeleteWorkout();
+                                        },
+                                        style: 'destructive'
+                                    }
+                                ]
+                            )
+                        }}
+                    >
+                        <Text style={styles.buttonText}>Delete Workout</Text>
+                    </Pressable>
+
                 </View>
             </ScrollView>
             

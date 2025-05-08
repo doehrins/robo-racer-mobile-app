@@ -198,6 +198,11 @@ export const getWorkoutEvents = async (db: SQLite.SQLiteDatabase) => {
   return workoutEvents;
 }
 
+export const removeWorkoutFromProfile = async(db: SQLite.SQLiteDatabase, workoutID: number) => {
+  const results = await db.executeSql(`UPDATE Workout SET SavedToProfile = false WHERE id = ${workoutID};`)
+  // console.log("remove workout from profile results:", results[0].rows.item(0))
+}
+
 // Function to insert pre-existing data into the Workout, Interval, and WorkoutEvent tables
 export const insertPreExistingData = async (db: SQLite.SQLiteDatabase) => {
   // Delete existing data
