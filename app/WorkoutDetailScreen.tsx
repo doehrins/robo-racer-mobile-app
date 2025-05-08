@@ -28,10 +28,13 @@ const WorkoutDetailScreen = () => {
         }, [])
     );
 
+    // Note that since WorkoutEvents are still reliant on Workouts, we're
+    // not actually deleting the Workout. Instead we simply update its 
+    // SavedToProfile flag so it doesn't display on the profile screen.
     const handleDeleteWorkout = async() => {
         const db = await getDBConnection();
         await removeWorkoutFromProfile(db, workoutID);
-        router.dismiss();
+        router.dismiss(); // return to profile screen
     }
 
     if (!workout) {
@@ -88,7 +91,7 @@ const WorkoutDetailScreen = () => {
                     </Link>
 
                     <Pressable 
-                        style={styles.button}
+                        style={styles.deleteButton}
                         onPress={() => {
                             Alert.alert(
                                 "Delete Workout?",
@@ -160,6 +163,14 @@ const styles = StyleSheet.create({
     },
     button: {
         backgroundColor: garminBlue,
+        alignItems: 'center',
+        borderRadius: 10,
+        padding: 10,
+        width: '80%',
+        alignSelf: 'center',
+    },
+    deleteButton: {
+        backgroundColor: 'darkred',
         alignItems: 'center',
         borderRadius: 10,
         padding: 10,
