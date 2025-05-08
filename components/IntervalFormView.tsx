@@ -1,41 +1,42 @@
 import { useState } from 'react'
 import { View, Text, TextInput, Image, Alert, StyleSheet, Pressable } from 'react-native';
+import { Dropdown } from 'react-native-element-dropdown';
 
 interface IntervalFormViewProps {
     index: number;
-    defaultTime: number;
+    defaultPace: number;
     defaultDist: number;
-    onSubmit: (time: number, distance: number) => void;
+    onSubmit: (pace: number, distance: number) => void;
     onDelete: () => void;
 }
 
-export function IntervalFormView({ index, defaultTime, defaultDist, onSubmit, onDelete }: IntervalFormViewProps) {
-    let defaultTimeValue: string = '';
+export function IntervalFormView({ index, defaultPace, defaultDist, onSubmit, onDelete }: IntervalFormViewProps) {
+    let defaultPaceValue: string = '';
     let defaultDistValue: string = '';
 
     // Check if form is in edit mode
-    if (!Number.isNaN(defaultTime) && !Number.isNaN(defaultDist)) {
+    if (!Number.isNaN(defaultPace) && !Number.isNaN(defaultDist)) {
         // Populate existing data
-        defaultTimeValue = defaultTime.toString();
+        defaultPaceValue = defaultPace.toString();
         defaultDistValue = defaultDist.toString();
     }
 
-    const [time, setTime] = useState(defaultTimeValue);
+    const [pace, setPace] = useState(defaultPaceValue);
     const [distance, setDistance] = useState(defaultDistValue);
 
 
-    function handleIntervalSubmit(time: String, distance: String) {
+    function handleIntervalSubmit(pace: String, distance: String) {
         // Validate input
-        let timeVal = Number(time)
+        let paceVal = Number(pace)
         let distanceVal = Number(distance)
 
-        if (!timeVal || !distanceVal) {
-            Alert.alert(`invalid time or distance`)
+        if (!paceVal || !distanceVal) {
+            Alert.alert(`invalid pace or distance`)
             return
         }
 
         // Pass new interval data back up to parent
-        onSubmit(timeVal, distanceVal)
+        onSubmit(paceVal, distanceVal)
     }
 
     return (
@@ -64,16 +65,16 @@ export function IntervalFormView({ index, defaultTime, defaultDist, onSubmit, on
             <TextInput
                 style={styles.textInput}
                 keyboardType='numeric'
-                value={time}
+                value={pace}
                 placeholder='0.0'
                 placeholderTextColor={'lightgray'}
                 textAlign='center'
-                onChangeText={newTime => setTime(newTime)}
+                onChangeText={newPace => setPace(newPace)}
             />
 
             <Pressable
                 style={styles.button}
-                onPress={() => handleIntervalSubmit(time, distance)}
+                onPress={() => handleIntervalSubmit(pace, distance)}
                 >
                 <Image
                     style={{flex: 1}}
