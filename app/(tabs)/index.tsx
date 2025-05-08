@@ -201,7 +201,7 @@ export default function HomeScreen() {
                 {showingIntervalFormView && // Conditionally render form
                   <IntervalFormView
                     index={intervals.length + 1}
-                    defaultTime={NaN}
+                    defaultPace={NaN}
                     defaultDist={NaN}
                     onSubmit={(newTime: number, newDistance: number) => handleIntervalSubmit(intervals.length + 1, newTime, newDistance)}
                     onDelete={() => {
