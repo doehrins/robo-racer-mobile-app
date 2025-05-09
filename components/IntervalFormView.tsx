@@ -1,6 +1,7 @@
 import { useState } from 'react'
+import React from 'react'
 import { View, Text, TextInput, Image, Alert, StyleSheet, Pressable } from 'react-native';
-// import { Dropdown } from 'react-native-element-dropdown';
+import { Dropdown } from 'react-native-element-dropdown';
 
 interface IntervalFormViewProps {
     index: number;
@@ -62,7 +63,7 @@ export function IntervalFormView({ index, defaultPace, defaultDist, onSubmit, on
                 onChangeText={newDistance => setDistance(newDistance)}
             />
 
-            {/* <Dropdown
+            <Dropdown
                 labelField="label"
                 valueField="value"
                 data={[
@@ -73,7 +74,7 @@ export function IntervalFormView({ index, defaultPace, defaultDist, onSubmit, on
                 onChange={item => {
                     setPace(item.value);
                 }}
-            /> */}
+            />
 
             <Pressable
                 style={styles.button}
