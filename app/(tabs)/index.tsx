@@ -185,7 +185,7 @@ export default function HomeScreen() {
                 <View style={styles.headingsContainer}>
                   <Text>Int</Text>
                   <Text>Distance (m)</Text>
-                  <Text>Time (sec)</Text>
+                  <Text>Pace (min/mi)</Text>
                 </View>
 
                 {intervals.map((interval) => (
@@ -201,7 +201,7 @@ export default function HomeScreen() {
                 {showingIntervalFormView && // Conditionally render form
                   <IntervalFormView
                     index={intervals.length + 1}
-                    defaultPace={NaN}
+                    defaultSpeed={0}
                     defaultDist={NaN}
                     onSubmit={(newTime: number, newDistance: number) => handleIntervalSubmit(intervals.length + 1, newTime, newDistance)}
                     onDelete={() => {
