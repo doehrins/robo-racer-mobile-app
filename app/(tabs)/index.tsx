@@ -60,10 +60,10 @@ export default function HomeScreen() {
     setWorkoutSaved(true);
   }
 
-  function handleIntervalSubmit(index: number, newTime: number, newDistance: number) {
+  function handleIntervalSubmit(index: number, newSpeed: number, newDistance: number) {
     // If adding a new interval
     if (index == intervals.length + 1) {
-      setIntervals([...intervals, {workoutID: -1, idx: index, time: newTime, distance: newDistance}]);
+      setIntervals([...intervals, {workoutID: -1, idx: index, speed: newSpeed, distance: newDistance}]);
       setShowingIntervalFormView(false);
     }
     // If editing an existing interval
@@ -71,7 +71,7 @@ export default function HomeScreen() {
       const newIntervals = intervals.map((interval, i) => {
         if (i == index - 1) {
           // Insert edited interval in proper location
-          return {workoutID: -1, idx: index, time: newTime, distance: newDistance};
+          return {workoutID: -1, idx: index, speed: newSpeed, distance: newDistance};
         }
         else {
           return interval;
@@ -92,7 +92,7 @@ export default function HomeScreen() {
     const newIntervals2 = newIntervals.map(int => {
       if (int.idx > index) {
         // Decrement the interval's index
-        return {workoutID: -1, idx: int.idx - 1, time: int.time, distance: int.distance};
+        return {workoutID: -1, idx: int.idx - 1, speed: int.speed, distance: int.distance};
       }
       else {
         return int;
@@ -109,14 +109,14 @@ export default function HomeScreen() {
     var totalTime = 0
     intervals.forEach((interval) => {
       totalDistance += interval.distance;
-      totalTime += interval.time;
+      totalTime += ((interval.distance / 1609.34) / interval.speed) * 360; // convert meters to miles, then hours to seconds
     })
 
     // workoutID returned from inserting workout
     const id = await insertWorkout(db, saveToProfile, totalDistance, totalTime, intervals.length, workoutName, workoutDescription);
 
     intervals.forEach((interval) => {
-      insertInterval(db, id, interval.idx, interval.time, interval.distance);
+      insertInterval(db, id, interval.idx, interval.speed, interval.distance);
     })
 
     return id;
@@ -192,7 +192,7 @@ export default function HomeScreen() {
                   <IntervalView
                     key={interval.idx} // necessary for React to manipulate the DOM
                     interval={interval}
-                    onEditSubmit={(newTime: number, newDistance: number) => handleIntervalSubmit(interval.idx, newTime, newDistance)}
+                    onEditSubmit={(newSpeed: number, newDistance: number) => handleIntervalSubmit(interval.idx, newSpeed, newDistance)}
                     onDelete={() => handleIntervalDeletion(interval.idx)}
                   />
                 ))}
@@ -203,7 +203,7 @@ export default function HomeScreen() {
                     index={intervals.length + 1}
                     defaultSpeed={0}
                     defaultDist={NaN}
-                    onSubmit={(newTime: number, newDistance: number) => handleIntervalSubmit(intervals.length + 1, newTime, newDistance)}
+                    onSubmit={(newSpeed: number, newDistance: number) => handleIntervalSubmit(intervals.length + 1, newSpeed, newDistance)}
                     onDelete={() => {
                       setShowingIntervalFormView(false);
                     }}

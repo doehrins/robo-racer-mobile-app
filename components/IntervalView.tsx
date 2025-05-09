@@ -2,17 +2,20 @@ import { useState } from 'react'
 import { View, Text, Image, Alert, StyleSheet, Pressable } from 'react-native';
 import { Interval } from '@/globals/constants/types'
 import { IntervalFormView } from './IntervalFormView';
+import React from 'react';
 
 
 interface IntervalViewProps {
   interval: Interval;
-  onEditSubmit: (time: number, distance: number) => void
+  onEditSubmit: (speed: number, distance: number) => void
   onDelete: () => void
 }
 
 
 export function IntervalView({ interval, onEditSubmit, onDelete }: IntervalViewProps) {
   const [showingFormView, setShowingFormView] = useState(false);
+  const paces = [60, 30, 20, 15, 12, 10, 8.5, 7.5, 6.66, 6, 5.5, 5] // indexed by speed, e.g. 2 mph is
+                                                                      // paces[2 - 1] == 30 min/mi
 
   return (
     <>
@@ -20,7 +23,7 @@ export function IntervalView({ interval, onEditSubmit, onDelete }: IntervalViewP
         <View style={intervalViewStyles.intervalContainer}>
           <Text>{interval.idx}</Text>
           <Text>{interval.distance}</Text>
-          <Text>{interval.time}</Text>
+          <Text>{paces[interval.speed - 1]}</Text>
           <Pressable
             style={intervalViewStyles.editButton}
             onPress={() => setShowingFormView(true)}
@@ -37,11 +40,11 @@ export function IntervalView({ interval, onEditSubmit, onDelete }: IntervalViewP
       {showingFormView &&
         <IntervalFormView
           index={interval.idx}
-          defaultTime={interval.time}
+          defaultSpeed={interval.speed}
           defaultDist={interval.distance}
-          onSubmit={(newTime: number, newDistance: number) => {
+          onSubmit={(newSpeed: number, newDistance: number) => {
             setShowingFormView(false);
-            onEditSubmit(newTime, newDistance);
+            onEditSubmit(newSpeed, newDistance);
           }}
           onDelete={() => 
             Alert.alert(

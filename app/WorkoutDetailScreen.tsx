@@ -4,12 +4,15 @@ import { garminBlue } from '@/globals/constants/Colors';
 import { Link, useLocalSearchParams, useFocusEffect, router } from 'expo-router'
 import { useState, useCallback } from 'react'
 import { getDBConnection, getWorkoutByID, getIntervals, removeWorkoutFromProfile } from './database/SQLiteDatabase';
+import React from 'react';
 
 
 const WorkoutDetailScreen = () => {
     const { id } = useLocalSearchParams();
     const workoutID = Number(id)
     const [workout, setWorkout] = useState<Workout>()
+    const paces = [60, 30, 20, 15, 12, 10, 8.5, 7.5, 6.66, 6, 5.5, 5] // indexed by speed, e.g. 2 mph is
+                                                                      // paces[2 - 1] == 30 min/mi
 
     const loadData = async() => {
         const db = await getDBConnection();
@@ -60,7 +63,7 @@ const WorkoutDetailScreen = () => {
                         <View style={styles.intervalDescriptors}>
                             <Text>Int</Text>
                             <Text>Distance (m)</Text>
-                            <Text>Time (sec)</Text>
+                            <Text>Pace (min/mi)</Text>
                         </View>
 
                         <View style={styles.intervalsContainer}>
@@ -71,7 +74,7 @@ const WorkoutDetailScreen = () => {
                                 >
                                     <Text>{interval.idx}</Text>
                                     <Text>{interval.distance}</Text>
-                                    <Text style={{marginLeft: 20}}>{interval.time}</Text>
+                                    <Text style={{marginLeft: 20}}>{paces[interval.speed - 1]}</Text>
                                 </View>
                             ))}
                         </View>

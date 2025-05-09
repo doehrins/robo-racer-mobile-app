@@ -7,7 +7,7 @@ interface IntervalFormViewProps {
     index: number;
     defaultSpeed: number;
     defaultDist: number;
-    onSubmit: (pace: number, distance: number) => void;
+    onSubmit: (speed: number, distance: number) => void;
     onDelete: () => void;
 }
 
