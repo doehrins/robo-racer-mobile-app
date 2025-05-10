@@ -109,7 +109,7 @@ export default function HomeScreen() {
     var totalTime = 0
     intervals.forEach((interval) => {
       totalDistance += interval.distance;
-      totalTime += ((interval.distance / 1609.34) / interval.speed) * 360; // convert meters to miles, then hours to seconds
+      totalTime += ((interval.distance / 1609.34) / interval.speed) * 360; // this is broken for now
     })
 
     // workoutID returned from inserting workout
@@ -130,6 +130,7 @@ export default function HomeScreen() {
     setWorkoutID(id)
   }
 
+  // Function that is called when user presses "configure robot" button
   const handleConfigRobot = async() => {
     const curDT = new Date().toISOString();
     if (workoutSaved) {
@@ -140,6 +141,9 @@ export default function HomeScreen() {
       const id = await buildWorkout(false);
       insertWorkoutEvent(db, curDT, id);
     }
+
+    // Rahul, your bluetooth code should probably go here. 
+    // The interval data is stored an array called 'intervals'
 
     setConfigurationSuccess(true);
   }
