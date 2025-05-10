@@ -3,7 +3,7 @@
 export type Interval = {
     workoutID: number;
     idx: number;
-    time: number; // duration in seconds
+    speed: number; // miles per hour
     distance: number; // distance in meters
 }
 

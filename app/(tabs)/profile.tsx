@@ -5,6 +5,7 @@ import { useSQLiteContext } from 'expo-sqlite';
 import { useState, useCallback } from 'react'
 import { useFocusEffect } from 'expo-router';
 import { getDBConnection, getProfileWorkouts } from '../database/SQLiteDatabase';
+import React from 'react';
 
 
 export default function TabTwoScreen() {

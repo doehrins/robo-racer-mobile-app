@@ -35,7 +35,7 @@ export const createTables = async (db: SQLite.SQLiteDatabase) => {
     `CREATE TABLE IF NOT EXISTS Interval (
       WorkoutConfigurationID INTEGER,
       "Index" INTEGER,
-      Time FLOAT,
+      Speed INTEGER,
       Distance FLOAT,
       FOREIGN KEY (WorkoutConfigurationID) REFERENCES Workout(ID)
     );`
@@ -71,10 +71,10 @@ export const insertWorkout = async (db: SQLite.SQLiteDatabase, savedToProfile: b
 };
 
 // Function to insert a new interval into the Interval table
-export const insertInterval = async (db: SQLite.SQLiteDatabase, workoutConfigurationID: number, index: number, time: number, distance: number) => {
+export const insertInterval = async (db: SQLite.SQLiteDatabase, workoutConfigurationID: number, index: number, speed: number, distance: number) => {
   await db.executeSql(
-    `INSERT INTO Interval (WorkoutConfigurationID, "Index", Time, Distance) VALUES (?, ?, ?, ?);`,
-    [workoutConfigurationID, index, time, distance]
+    `INSERT INTO Interval (WorkoutConfigurationID, "Index", Speed, Distance) VALUES (?, ?, ?, ?);`,
+    [workoutConfigurationID, index, speed, distance]
   );
 };
 
@@ -161,7 +161,7 @@ export const getIntervals = async (db: SQLite.SQLiteDatabase, workoutConfigurati
   const transformedData: Interval[] = rawData.map((item) => ({
     workoutID: item.WorkoutConfigurationID, 
     idx: item.Index,
-    time: item.Time || 0, 
+    speed: item.Speed || 0, 
     distance: item.Distance || 0, 
   }));
 
@@ -183,7 +183,7 @@ export const getWorkoutEvents = async (db: SQLite.SQLiteDatabase) => {
 
     // Calculate average speed and total distance
     const totalDistance = intervals.reduce((sum, interval) => sum + interval.Distance, 0);
-    const avgSpeed = intervals.length > 0 ? (intervals.reduce((sum, interval) => sum + interval.speed, 0) / intervals.length).toFixed(2) : '0';
+    const avgSpeed = intervals.length > 0 ? (intervals.reduce((sum, interval) => sum + interval.speed, 0) / intervals.length).toFixed(2) : '0'; // this might break
 
     // Extract date and time from StartDatetime
     const startDatetime = new Date(event.StartDatetime);
@@ -216,25 +216,25 @@ export const insertPreExistingData = async (db: SQLite.SQLiteDatabase) => {
   const workout3ID = await insertWorkout(db, true, 15.0, 90.0, 7, 'Weekend Run', 'A long weekend run');
 
   // Insert Intervals for Workout 1
-  await insertInterval(db, workout1ID, 1, 10.0, 1.5);
-  await insertInterval(db, workout1ID, 2, 10.0, 1.5);
-  await insertInterval(db, workout1ID, 3, 10.0, 2.0);
+  await insertInterval(db, workout1ID, 1, 1, 1.5);
+  await insertInterval(db, workout1ID, 2, 5, 1.5);
+  await insertInterval(db, workout1ID, 3, 8, 2.0);
 
   // Insert Intervals for Workout 2
-  await insertInterval(db, workout2ID, 1, 12.0, 2.0);
-  await insertInterval(db, workout2ID, 2, 12.0, 2.0);
-  await insertInterval(db, workout2ID, 3, 12.0, 2.0);
-  await insertInterval(db, workout2ID, 4, 12.0, 2.0);
-  await insertInterval(db, workout2ID, 5, 12.0, 2.0);
+  await insertInterval(db, workout2ID, 1, 12, 2.0);
+  await insertInterval(db, workout2ID, 2, 12, 2.0);
+  await insertInterval(db, workout2ID, 3, 12, 2.0);
+  await insertInterval(db, workout2ID, 4, 12, 2.0);
+  await insertInterval(db, workout2ID, 5, 12, 2.0);
 
   // Insert Intervals for Workout 3
-  await insertInterval(db, workout3ID, 1, 15.0, 2.5);
-  await insertInterval(db, workout3ID, 2, 15.0, 2.5);
-  await insertInterval(db, workout3ID, 3, 15.0, 2.5);
-  await insertInterval(db, workout3ID, 4, 15.0, 2.5);
-  await insertInterval(db, workout3ID, 5, 15.0, 2.5);
-  await insertInterval(db, workout3ID, 6, 15.0, 2.5);
-  await insertInterval(db, workout3ID, 7, 15.0, 2.5);
+  await insertInterval(db, workout3ID, 1, 3, 2.5);
+  await insertInterval(db, workout3ID, 2, 3, 2.5);
+  await insertInterval(db, workout3ID, 3, 3, 2.5);
+  await insertInterval(db, workout3ID, 4, 3, 2.5);
+  await insertInterval(db, workout3ID, 5, 3, 2.5);
+  await insertInterval(db, workout3ID, 6, 3, 2.5);
+  await insertInterval(db, workout3ID, 7, 3, 2.5);
 
   // Insert Workout Events
   await insertWorkoutEvent(db, '2025-03-01T08:00:00Z', workout1ID);
