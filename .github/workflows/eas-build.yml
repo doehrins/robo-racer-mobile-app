@@ -1,0 +1,41 @@
+name: CI/CD Pipeline for Development Builds
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Build Development App
+    runs-on: ubuntu-latest
+
+    steps:
+      # checkout repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # set up Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      # install dependencies
+      - name: Install dependencies
+        run: npm install
+
+      # authenticate with Expo
+      - name: Authenticate with Expo
+        run: eas login --token ${{ secrets.EXPO_TOKEN }}
+
+      # build the app for Android
+      - name: Build Android APK
+        run: eas build --platform android --profile development --non-interactive
+
+      # build the app for iOS
+      # - name: Build iOS Simulator Build
+      #   run: eas build --platform ios --profile development --non-interactive
