@@ -8,9 +8,9 @@ SQLite.enablePromise(true);
 const database_name = "RoboRacer.db";
 
 // Function to get a database connection
-export const getDBConnection = async () => {
+export const getDBConnection = async (inMemory = false) => {
   return SQLite.openDatabase({
-    name: database_name,
+    name: inMemory ? ':memory:' : database_name,
     location: 'default',
   });
 };
